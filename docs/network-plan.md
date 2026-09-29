@@ -2,19 +2,22 @@
 
 ## 目的と状態
 
-EKSのNode・Podを3つのAZに配置し、Public・アプリ・DBのネットワークを分ける。以下はTerraform実装前の**暫定案**であり、AWSリソースはまだ作成しない。
+EKSのNode・Podを東京リージョンの3つのAZに配置し、Public・アプリ・DBのネットワークを分ける。VPC CIDRとAZは決定済み、サブネット配置はTerraform実装前の**暫定案**。AWSリソースはまだ作成しない。
 
 ## CIDR配置案
 
-VPC `10.20.0.0/19`（`10.20.0.0`〜`10.20.31.255`）を例とする。アドレスは仮の値で、環境ごとに重複しないCIDRを確定する。
+リージョンは `ap-northeast-1`。VPC CIDRは `stg: 10.20.0.0/19`、`prod: 10.21.0.0/19` とし、環境間で重複させない。利用するAWSアカウントで確認したAZは以下の通り。
 
-| AZ | Public | Private app | Private DB |
-| --- | --- | --- | --- |
-| a | `10.20.12.0/26` | `10.20.0.0/22` | `10.20.12.192/26` |
-| b | `10.20.12.64/26` | `10.20.4.0/22` | `10.20.13.0/26` |
-| c | `10.20.12.128/26` | `10.20.8.0/22` | `10.20.13.64/26` |
+| 環境 | AZ (AZ ID) | Public | Private app | Private DB |
+| --- | --- | --- | --- | --- |
+| stg | `ap-northeast-1a` (`apne1-az4`) | `10.20.12.0/26` | `10.20.0.0/22` | `10.20.12.192/26` |
+| stg | `ap-northeast-1c` (`apne1-az1`) | `10.20.12.64/26` | `10.20.4.0/22` | `10.20.13.0/26` |
+| stg | `ap-northeast-1d` (`apne1-az2`) | `10.20.12.128/26` | `10.20.8.0/22` | `10.20.13.64/26` |
+| prod | `ap-northeast-1a` (`apne1-az4`) | `10.21.12.0/26` | `10.21.0.0/22` | `10.21.12.192/26` |
+| prod | `ap-northeast-1c` (`apne1-az1`) | `10.21.12.64/26` | `10.21.4.0/22` | `10.21.13.0/26` |
+| prod | `ap-northeast-1d` (`apne1-az2`) | `10.21.12.128/26` | `10.21.8.0/22` | `10.21.13.64/26` |
 
-PublicにはALB・NAT Gateway、Private appにはEKSのNode・Pod、Private DBにはRDSを配置する想定。サブネット同士は重複しない。
+PublicにはALB・NAT Gateway、Private appにはEKSのNode・Pod、Private DBにはRDSを配置する想定。サブネット同士は重複しない。AZ名とAZ IDの対応はAWSアカウントによって異なる場合があるため、別アカウントで使う際は再確認する。
 
 ## サイズを選んだ理由
 
@@ -24,6 +27,5 @@ PublicにはALB・NAT Gateway、Private appにはEKSのNode・Pod、Private DB�
 
 ## 実装前に確認すること
 
-- `stg`と`prod`で重複しないVPC CIDRと、実際に使用するAZを決める。
 - Nodeのインスタンスタイプ・最大数、VPC CNIのIP割り当て方式を決めて、Private appの必要IP数を見直す。
 - NAT Gatewayの配置と費用を確認する。
