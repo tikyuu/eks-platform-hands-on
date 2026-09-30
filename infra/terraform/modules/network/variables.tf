@@ -15,3 +15,21 @@ variable "public_subnets" {
     cidr_block = string
   }))
 }
+
+variable "private_app_subnets" {
+  description = "Private application subnet settings keyed by Availability Zone."
+
+  type = map(object({
+    name       = string
+    cidr_block = string
+  }))
+}
+
+variable "private_db_subnets" {
+  description = "Private database subnet settings keyed by Availability Zone."
+
+  type = map(object({
+    name       = string
+    cidr_block = string
+  }))
+}
