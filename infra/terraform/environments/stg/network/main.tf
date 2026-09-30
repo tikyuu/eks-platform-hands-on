@@ -8,6 +8,8 @@ module "network" {
 
   internet_gateway_name = "eks-stg-igw"
 
+  public_route_table_name = "eks-stg-rtb-public"
+
   public_subnets = {
     "ap-northeast-1a" = {
       name       = "eks-stg-subnet-public-1a"

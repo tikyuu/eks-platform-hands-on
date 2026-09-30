@@ -12,6 +12,11 @@ variable "internet_gateway_name" {
   type        = string
 }
 
+variable "public_route_table_name" {
+  description = "Name tag for the public route table."
+  type        = string
+}
+
 variable "public_subnets" {
   description = "Public subnet settings keyed by Availability Zone."
 
