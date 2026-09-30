@@ -7,6 +7,11 @@ variable "vpc" {
   })
 }
 
+variable "internet_gateway_name" {
+  description = "Name tag for the Internet Gateway."
+  type        = string
+}
+
 variable "public_subnets" {
   description = "Public subnet settings keyed by Availability Zone."
 

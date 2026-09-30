@@ -6,6 +6,8 @@ module "network" {
     cidr_block = "10.20.0.0/19"
   }
 
+  internet_gateway_name = "eks-stg-igw"
+
   public_subnets = {
     "ap-northeast-1a" = {
       name       = "eks-stg-subnet-public-1a"
