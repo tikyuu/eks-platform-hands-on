@@ -7,6 +7,15 @@ output "private_app_subnet_ids" {
   }
 }
 
+output "private_db_subnet_ids" {
+  description = "Private database subnet IDs keyed by Availability Zone."
+
+  value = {
+    for availability_zone, subnet in aws_subnet.private_db :
+    availability_zone => subnet.id
+  }
+}
+
 output "public_subnet_ids" {
   description = "Public subnet IDs keyed by Availability Zone."
 
