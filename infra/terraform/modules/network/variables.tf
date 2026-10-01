@@ -17,6 +17,11 @@ variable "public_route_table_name" {
   type        = string
 }
 
+variable "nat_gateway_name" {
+  description = "Name tag for the NAT Gateway."
+  type        = string
+}
+
 variable "public_subnets" {
   description = "Public subnet settings keyed by Availability Zone."
 
