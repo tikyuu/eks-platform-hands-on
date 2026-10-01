@@ -5,3 +5,10 @@ resource "aws_route_table" "private_db" {
     Name = var.private_db_route_table_name
   }
 }
+
+resource "aws_route_table_association" "private_db" {
+  for_each = aws_subnet.private_db
+
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.private_db.id
+}
