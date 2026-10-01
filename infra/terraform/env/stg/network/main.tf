@@ -12,6 +12,8 @@ module "network" {
 
   public_route_table_name = "eks-stg-rtb-public"
 
+  private_app_route_table_name = "eks-stg-rtb-app"
+
   public_subnets = {
     "ap-northeast-1a" = {
       name       = "eks-stg-subnet-public-1a"
