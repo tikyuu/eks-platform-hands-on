@@ -22,6 +22,11 @@ variable "private_app_route_table_name" {
   type        = string
 }
 
+variable "private_db_route_table_name" {
+  description = "Name tag for the private database route table."
+  type        = string
+}
+
 variable "nat_gateway_name" {
   description = "Name tag for the NAT Gateway."
   type        = string
