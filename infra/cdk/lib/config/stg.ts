@@ -1,9 +1,14 @@
+import { InternetGatewayConfig } from '../constructs/network/gateway';
 import { SubnetConfig } from '../constructs/network/subnets';
 import { VpcConfig } from '../constructs/network/vpc';
 
 export const stgVpcConfig: VpcConfig = {
   name: 'eks-stg-vpc',
   cidrBlock: '10.20.0.0/19',
+};
+
+export const stgInternetGatewayConfig: InternetGatewayConfig = {
+  name: 'eks-stg-igw',
 };
 
 export const stgPublicSubnetConfigs: readonly SubnetConfig[] = [
