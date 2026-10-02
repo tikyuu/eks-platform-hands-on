@@ -41,3 +41,21 @@ export const stgPrivateAppSubnetConfigs: readonly SubnetConfig[] = [
     cidrBlock: '10.20.8.0/22',
   },
 ];
+
+export const stgPrivateDbSubnetConfigs: readonly SubnetConfig[] = [
+  {
+    name: 'eks-stg-subnet-db-1a',
+    availabilityZone: 'ap-northeast-1a',
+    cidrBlock: '10.20.12.192/26',
+  },
+  {
+    name: 'eks-stg-subnet-db-1c',
+    availabilityZone: 'ap-northeast-1c',
+    cidrBlock: '10.20.13.0/26',
+  },
+  {
+    name: 'eks-stg-subnet-db-1d',
+    availabilityZone: 'ap-northeast-1d',
+    cidrBlock: '10.20.13.64/26',
+  },
+];

@@ -7,8 +7,9 @@ export class Network extends Construct {
   readonly vpc: CfnVPC;
   readonly publicSubnets: readonly CfnSubnet[];
   readonly privateAppSubnets: readonly CfnSubnet[];
+  readonly privateDbSubnets: readonly CfnSubnet[];
 
-  constructor(scope: Construct, id: string, vpcConfig: VpcConfig, publicSubnetConfigs: readonly SubnetConfig[], privateAppSubnetConfigs: readonly SubnetConfig[]) {
+  constructor(scope: Construct, id: string, vpcConfig: VpcConfig, publicSubnetConfigs: readonly SubnetConfig[], privateAppSubnetConfigs: readonly SubnetConfig[], privateDbSubnetConfigs: readonly SubnetConfig[]) {
     super(scope, id);
 
     this.vpc = createVpc(this, 'Vpc', vpcConfig);
@@ -19,6 +20,10 @@ export class Network extends Construct {
 
     this.privateAppSubnets = privateAppSubnetConfigs.map((config) =>
       createSubnet(this, `PrivateAppSubnet-${config.availabilityZone}`, this.vpc.ref, config),
+    );
+
+    this.privateDbSubnets = privateDbSubnetConfigs.map((config) =>
+      createSubnet(this, `PrivateDbSubnet-${config.availabilityZone}`, this.vpc.ref, config),
     );
   }
 }
