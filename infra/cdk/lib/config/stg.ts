@@ -1,4 +1,5 @@
 import { InternetGatewayConfig } from '../constructs/network/gateway';
+import { RouteTableConfig } from '../constructs/network/route-tables';
 import { SubnetConfig } from '../constructs/network/subnets';
 import { VpcConfig } from '../constructs/network/vpc';
 
@@ -9,6 +10,10 @@ export const stgVpcConfig: VpcConfig = {
 
 export const stgInternetGatewayConfig: InternetGatewayConfig = {
   name: 'eks-stg-igw',
+};
+
+export const stgPublicRouteTableConfig: RouteTableConfig = {
+  name: 'eks-stg-rtb-public',
 };
 
 export const stgPublicSubnetConfigs: readonly SubnetConfig[] = [
