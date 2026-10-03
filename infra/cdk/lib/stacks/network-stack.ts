@@ -12,6 +12,7 @@ export interface NetworkStackProps extends StackProps {
   readonly natGatewayConfig: NatGatewayConfig;
   readonly publicRouteTableConfig: RouteTableConfig;
   readonly privateAppRouteTableConfig: RouteTableConfig;
+  readonly privateDbRouteTableConfig: RouteTableConfig;
   readonly publicSubnetConfigs: readonly SubnetConfig[];
   readonly privateAppSubnetConfigs: readonly SubnetConfig[];
   readonly privateDbSubnetConfigs: readonly SubnetConfig[];
@@ -27,6 +28,7 @@ export class NetworkStack extends Stack {
       natGatewayConfig: props.natGatewayConfig,
       publicRouteTableConfig: props.publicRouteTableConfig,
       privateAppRouteTableConfig: props.privateAppRouteTableConfig,
+      privateDbRouteTableConfig: props.privateDbRouteTableConfig,
       publicSubnetConfigs: props.publicSubnetConfigs,
       privateAppSubnetConfigs: props.privateAppSubnetConfigs,
       privateDbSubnetConfigs: props.privateDbSubnetConfigs,

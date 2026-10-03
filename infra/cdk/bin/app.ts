@@ -1,5 +1,5 @@
 import { App } from 'aws-cdk-lib';
-import { stgInternetGatewayConfig, stgNatGatewayConfig, stgPrivateAppRouteTableConfig, stgPrivateAppSubnetConfigs, stgPrivateDbSubnetConfigs, stgPublicRouteTableConfig, stgPublicSubnetConfigs, stgVpcConfig } from '../lib/config/stg';
+import { stgInternetGatewayConfig, stgNatGatewayConfig, stgPrivateAppRouteTableConfig, stgPrivateAppSubnetConfigs, stgPrivateDbRouteTableConfig, stgPrivateDbSubnetConfigs, stgPublicRouteTableConfig, stgPublicSubnetConfigs, stgVpcConfig } from '../lib/config/stg';
 import { NetworkStack } from '../lib/stacks/network-stack';
 
 const app = new App();
@@ -10,6 +10,7 @@ new NetworkStack(app, 'NetworkStack', {
   natGatewayConfig: stgNatGatewayConfig,
   publicRouteTableConfig: stgPublicRouteTableConfig,
   privateAppRouteTableConfig: stgPrivateAppRouteTableConfig,
+  privateDbRouteTableConfig: stgPrivateDbRouteTableConfig,
   publicSubnetConfigs: stgPublicSubnetConfigs,
   privateAppSubnetConfigs: stgPrivateAppSubnetConfigs,
   privateDbSubnetConfigs: stgPrivateDbSubnetConfigs,
