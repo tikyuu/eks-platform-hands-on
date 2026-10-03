@@ -1,0 +1,8 @@
+[project]
+name = "product-api"
+version = "0.1.0"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "fastapi>=0.116.1,<1.0",
+    "uvicorn>=0.35.0,<1.0",
+]
