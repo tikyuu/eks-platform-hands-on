@@ -68,5 +68,9 @@ export class Network extends Construct {
     this.privateDbSubnets = props.privateDbSubnetConfigs.map((config) =>
       createSubnet(this, `PrivateDbSubnet-${config.availabilityZone}`, this.vpc.ref, config),
     );
+
+    this.privateDbSubnets.forEach((subnet) => {
+      associateSubnetRouteTable(this, `${subnet.node.id}RouteTableAssociation`, subnet.ref, this.privateDbRouteTable.ref);
+    });
   }
 }
