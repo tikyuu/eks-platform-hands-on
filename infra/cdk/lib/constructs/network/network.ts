@@ -10,6 +10,7 @@ export interface NetworkProps {
   readonly internetGatewayConfig: InternetGatewayConfig;
   readonly natGatewayConfig: NatGatewayConfig;
   readonly publicRouteTableConfig: RouteTableConfig;
+  readonly privateAppRouteTableConfig: RouteTableConfig;
   readonly publicSubnetConfigs: readonly SubnetConfig[];
   readonly privateAppSubnetConfigs: readonly SubnetConfig[];
   readonly privateDbSubnetConfigs: readonly SubnetConfig[];
@@ -21,6 +22,7 @@ export class Network extends Construct {
   readonly internetGatewayAttachment: CfnVPCGatewayAttachment;
   readonly natGateway: CfnNatGateway;
   readonly publicRouteTable: CfnRouteTable;
+  readonly privateAppRouteTable: CfnRouteTable;
   readonly publicSubnets: readonly CfnSubnet[];
   readonly privateAppSubnets: readonly CfnSubnet[];
   readonly privateDbSubnets: readonly CfnSubnet[];
@@ -37,6 +39,7 @@ export class Network extends Construct {
     this.natGateway.addResourceDependency(this.internetGatewayAttachment);
 
     this.publicRouteTable = createRouteTable(this, 'PublicRouteTable', this.vpc.ref, props.publicRouteTableConfig);
+    this.privateAppRouteTable = createRouteTable(this, 'PrivateAppRouteTable', this.vpc.ref, props.privateAppRouteTableConfig);
 
     const publicInternetRoute = createInternetGatewayRoute(this, 'PublicInternetRoute', this.publicRouteTable.ref, this.internetGateway.ref);
     publicInternetRoute.addResourceDependency(this.internetGatewayAttachment);

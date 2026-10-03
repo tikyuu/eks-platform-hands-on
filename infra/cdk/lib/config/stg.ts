@@ -20,6 +20,10 @@ export const stgPublicRouteTableConfig: RouteTableConfig = {
   name: 'eks-stg-rtb-public',
 };
 
+export const stgPrivateAppRouteTableConfig: RouteTableConfig = {
+  name: 'eks-stg-rtb-app',
+};
+
 export const stgPublicSubnetConfigs: readonly SubnetConfig[] = [
   {
     name: 'eks-stg-subnet-public-1a',
