@@ -19,6 +19,13 @@ export class NetworkStack extends Stack {
   constructor(scope: Construct, id: string, props: NetworkStackProps) {
     super(scope, id, props);
 
-    new Network(this, 'Network', props.vpcConfig, props.publicSubnetConfigs, props.privateAppSubnetConfigs, props.privateDbSubnetConfigs, props.internetGatewayConfig, props.publicRouteTableConfig);
+    new Network(this, 'Network', {
+      vpcConfig: props.vpcConfig,
+      internetGatewayConfig: props.internetGatewayConfig,
+      publicRouteTableConfig: props.publicRouteTableConfig,
+      publicSubnetConfigs: props.publicSubnetConfigs,
+      privateAppSubnetConfigs: props.privateAppSubnetConfigs,
+      privateDbSubnetConfigs: props.privateDbSubnetConfigs,
+    });
   }
 }
