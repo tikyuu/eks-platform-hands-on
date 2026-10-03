@@ -1,7 +1,7 @@
 import { CfnInternetGateway, CfnRouteTable, CfnSubnet, CfnVPC, CfnVPCGatewayAttachment } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 import { attachInternetGateway, createInternetGateway, InternetGatewayConfig } from './gateway';
-import { createInternetGatewayRoute, createRouteTable, RouteTableConfig } from './route-tables';
+import { associateSubnetRouteTable, createInternetGatewayRoute, createRouteTable, RouteTableConfig } from './route-tables';
 import { createSubnet, SubnetConfig } from './subnets';
 import { createVpc, VpcConfig } from './vpc';
 
@@ -39,6 +39,10 @@ export class Network extends Construct {
     this.publicSubnets = props.publicSubnetConfigs.map((config) =>
       createSubnet(this, `PublicSubnet-${config.availabilityZone}`, this.vpc.ref, config),
     );
+
+    this.publicSubnets.forEach((subnet) => {
+      associateSubnetRouteTable(this, `${subnet.node.id}RouteTableAssociation`, subnet.ref, this.publicRouteTable.ref);
+    });
 
     this.privateAppSubnets = props.privateAppSubnetConfigs.map((config) =>
       createSubnet(this, `PrivateAppSubnet-${config.availabilityZone}`, this.vpc.ref, config),

@@ -1,4 +1,4 @@
-import { CfnRoute, CfnRouteTable } from 'aws-cdk-lib/aws-ec2';
+import { CfnRoute, CfnRouteTable, CfnSubnetRouteTableAssociation } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 
 export interface RouteTableConfig {
@@ -17,5 +17,12 @@ export function createInternetGatewayRoute(scope: Construct, id: string, routeTa
     routeTableId,
     destinationCidrBlock: '0.0.0.0/0',
     gatewayId: internetGatewayId,
+  });
+}
+
+export function associateSubnetRouteTable(scope: Construct, id: string, subnetId: string, routeTableId: string): CfnSubnetRouteTableAssociation {
+  return new CfnSubnetRouteTableAssociation(scope, id, {
+    subnetId,
+    routeTableId,
   });
 }
