@@ -1,6 +1,6 @@
-import { CfnInternetGateway, CfnRouteTable, CfnSubnet, CfnVPC, CfnVPCGatewayAttachment } from 'aws-cdk-lib/aws-ec2';
+import { CfnInternetGateway, CfnNatGateway, CfnRouteTable, CfnSubnet, CfnVPC, CfnVPCGatewayAttachment } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
-import { attachInternetGateway, createInternetGateway, InternetGatewayConfig } from './gateway';
+import { attachInternetGateway, createInternetGateway, createRegionalNatGateway, InternetGatewayConfig, NatGatewayConfig } from './gateway';
 import { associateSubnetRouteTable, createInternetGatewayRoute, createRouteTable, RouteTableConfig } from './route-tables';
 import { createSubnet, SubnetConfig } from './subnets';
 import { createVpc, VpcConfig } from './vpc';
@@ -8,6 +8,7 @@ import { createVpc, VpcConfig } from './vpc';
 export interface NetworkProps {
   readonly vpcConfig: VpcConfig;
   readonly internetGatewayConfig: InternetGatewayConfig;
+  readonly natGatewayConfig: NatGatewayConfig;
   readonly publicRouteTableConfig: RouteTableConfig;
   readonly publicSubnetConfigs: readonly SubnetConfig[];
   readonly privateAppSubnetConfigs: readonly SubnetConfig[];
@@ -18,6 +19,7 @@ export class Network extends Construct {
   readonly vpc: CfnVPC;
   readonly internetGateway: CfnInternetGateway;
   readonly internetGatewayAttachment: CfnVPCGatewayAttachment;
+  readonly natGateway: CfnNatGateway;
   readonly publicRouteTable: CfnRouteTable;
   readonly publicSubnets: readonly CfnSubnet[];
   readonly privateAppSubnets: readonly CfnSubnet[];
@@ -30,6 +32,9 @@ export class Network extends Construct {
 
     this.internetGateway = createInternetGateway(this, 'InternetGateway', props.internetGatewayConfig);
     this.internetGatewayAttachment = attachInternetGateway(this, 'InternetGatewayAttachment', this.vpc.ref, this.internetGateway.ref);
+
+    this.natGateway = createRegionalNatGateway(this, 'NatGateway', this.vpc.ref, props.natGatewayConfig);
+    this.natGateway.addResourceDependency(this.internetGatewayAttachment);
 
     this.publicRouteTable = createRouteTable(this, 'PublicRouteTable', this.vpc.ref, props.publicRouteTableConfig);
 
