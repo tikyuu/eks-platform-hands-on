@@ -20,6 +20,14 @@ export function createInternetGatewayRoute(scope: Construct, id: string, routeTa
   });
 }
 
+export function createNatGatewayRoute(scope: Construct, id: string, routeTableId: string, natGatewayId: string): CfnRoute {
+  return new CfnRoute(scope, id, {
+    routeTableId,
+    destinationCidrBlock: '0.0.0.0/0',
+    natGatewayId,
+  });
+}
+
 export function associateSubnetRouteTable(scope: Construct, id: string, subnetId: string, routeTableId: string): CfnSubnetRouteTableAssociation {
   return new CfnSubnetRouteTableAssociation(scope, id, {
     subnetId,
