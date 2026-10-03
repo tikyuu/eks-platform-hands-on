@@ -5,6 +5,15 @@ import { createRouteTable, RouteTableConfig } from './route-tables';
 import { createSubnet, SubnetConfig } from './subnets';
 import { createVpc, VpcConfig } from './vpc';
 
+export interface NetworkProps {
+  readonly vpcConfig: VpcConfig;
+  readonly internetGatewayConfig: InternetGatewayConfig;
+  readonly publicRouteTableConfig: RouteTableConfig;
+  readonly publicSubnetConfigs: readonly SubnetConfig[];
+  readonly privateAppSubnetConfigs: readonly SubnetConfig[];
+  readonly privateDbSubnetConfigs: readonly SubnetConfig[];
+}
+
 export class Network extends Construct {
   readonly vpc: CfnVPC;
   readonly internetGateway: CfnInternetGateway;
@@ -14,25 +23,25 @@ export class Network extends Construct {
   readonly privateAppSubnets: readonly CfnSubnet[];
   readonly privateDbSubnets: readonly CfnSubnet[];
 
-  constructor(scope: Construct, id: string, vpcConfig: VpcConfig, publicSubnetConfigs: readonly SubnetConfig[], privateAppSubnetConfigs: readonly SubnetConfig[], privateDbSubnetConfigs: readonly SubnetConfig[], internetGatewayConfig: InternetGatewayConfig, publicRouteTableConfig: RouteTableConfig) {
+  constructor(scope: Construct, id: string, props: NetworkProps) {
     super(scope, id);
 
-    this.vpc = createVpc(this, 'Vpc', vpcConfig);
+    this.vpc = createVpc(this, 'Vpc', props.vpcConfig);
 
-    this.internetGateway = createInternetGateway(this, 'InternetGateway', internetGatewayConfig);
+    this.internetGateway = createInternetGateway(this, 'InternetGateway', props.internetGatewayConfig);
     this.internetGatewayAttachment = attachInternetGateway(this, 'InternetGatewayAttachment', this.vpc.ref, this.internetGateway.ref);
 
-    this.publicRouteTable = createRouteTable(this, 'PublicRouteTable', this.vpc.ref, publicRouteTableConfig);
+    this.publicRouteTable = createRouteTable(this, 'PublicRouteTable', this.vpc.ref, props.publicRouteTableConfig);
 
-    this.publicSubnets = publicSubnetConfigs.map((config) =>
+    this.publicSubnets = props.publicSubnetConfigs.map((config) =>
       createSubnet(this, `PublicSubnet-${config.availabilityZone}`, this.vpc.ref, config),
     );
 
-    this.privateAppSubnets = privateAppSubnetConfigs.map((config) =>
+    this.privateAppSubnets = props.privateAppSubnetConfigs.map((config) =>
       createSubnet(this, `PrivateAppSubnet-${config.availabilityZone}`, this.vpc.ref, config),
     );
 
-    this.privateDbSubnets = privateDbSubnetConfigs.map((config) =>
+    this.privateDbSubnets = props.privateDbSubnetConfigs.map((config) =>
       createSubnet(this, `PrivateDbSubnet-${config.availabilityZone}`, this.vpc.ref, config),
     );
   }
