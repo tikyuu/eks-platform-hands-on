@@ -1,7 +1,7 @@
 import { CfnInternetGateway, CfnNatGateway, CfnRouteTable, CfnSubnet, CfnVPC, CfnVPCGatewayAttachment } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 import { attachInternetGateway, createInternetGateway, createRegionalNatGateway, InternetGatewayConfig, NatGatewayConfig } from './gateway';
-import { associateSubnetRouteTable, createInternetGatewayRoute, createRouteTable, RouteTableConfig } from './route-tables';
+import { associateSubnetRouteTable, createInternetGatewayRoute, createNatGatewayRoute, createRouteTable, RouteTableConfig } from './route-tables';
 import { createSubnet, SubnetConfig } from './subnets';
 import { createVpc, VpcConfig } from './vpc';
 
@@ -43,6 +43,8 @@ export class Network extends Construct {
 
     const publicInternetRoute = createInternetGatewayRoute(this, 'PublicInternetRoute', this.publicRouteTable.ref, this.internetGateway.ref);
     publicInternetRoute.addResourceDependency(this.internetGatewayAttachment);
+
+    createNatGatewayRoute(this, 'PrivateAppInternetRoute', this.privateAppRouteTable.ref, this.natGateway.ref);
 
     this.publicSubnets = props.publicSubnetConfigs.map((config) =>
       createSubnet(this, `PublicSubnet-${config.availabilityZone}`, this.vpc.ref, config),
