@@ -1,6 +1,6 @@
 # minikubeで商品APIを動かす手順
 
-前提：Docker Desktopを起動し、`product-api:local` イメージを作成しておく（[Dockerでの商品API実行手順](./Dockerで商品APIを動かす手順.md)）。コマンドはリポジトリのルートで実行する。
+前提：Docker Desktopを起動しておく（[Dockerでの商品API実行手順](./Dockerで商品APIを動かす手順.md)）。コマンドはリポジトリのルートで実行する。
 
 ## 実行した手順
 
@@ -15,14 +15,15 @@
 
    `minikube` Nodeが `Ready` になった。ここでは商品APIのPodはまだ作られない。
 
-2. Dockerで作ったイメージをminikubeから使えるようにする。
+2. `/readyz` を含む商品APIのイメージを作り、minikubeから使えるようにする。
 
    ```bash
-   minikube image load product-api:local
+   docker build -t product-api:readiness-v1 apps/product-api
+   minikube image load product-api:readiness-v1
    minikube image ls
    ```
 
-   一覧に `docker.io/library/product-api:local` が表示された。イメージの再ビルドやPodの起動ではない。
+   一覧に `docker.io/library/product-api:readiness-v1` が表示された。`image load` は作成済みイメージをminikubeで使えるようにする操作で、Podはまだ起動しない。
 
 3. [Deploymentの設定](../k8s/local/product-api/deployment.yaml)を確認してから適用する。
 
@@ -67,6 +68,16 @@
    ```
 
    `Service` の `Endpoints` に商品APIのPod IPが表示された。Serviceは `ClusterIP` 型なので、クラスター外へは公開しない。
+
+6. Readiness Probeが動作し、Serviceに準備済みPodが登録されたことを確認する。
+
+   ```bash
+   kubectl rollout status deployment/product-api --timeout=60s
+   kubectl describe pod -l app=product-api
+   kubectl describe service product-api
+   ```
+
+   [Deploymentの設定](../k8s/local/product-api/deployment.yaml)では、Node上のkubeletがPodの `/readyz:8000` を定期的に確認する。今回の確認ではPodが `Ready: True` になり、Serviceの `Endpoints` にそのPodのIPとポートが表示された。起動直後に一時的な接続拒否が記録されても、後から `Ready: True` になれば準備は完了している。
 
 ## 仕組みを図で振り返る
 
