@@ -57,4 +57,37 @@
 
    商品2件が返った。`port-forward` を `Ctrl+C` で止めても、Podは動き続ける。
 
-**流れ：Dockerイメージ → minikubeへ読み込み → Deployment → ReplicaSet → Pod → 一時的な接続でAPI確認。** Serviceはまだ作成していない。
+5. [Serviceの設定](../k8s/local/product-api/service.yaml)を適用し、接続先のPodを確認する。
+
+   ```bash
+   kubectl apply --dry-run=client -f k8s/local/product-api/service.yaml
+   kubectl apply -f k8s/local/product-api/service.yaml
+   kubectl describe service product-api
+   kubectl get pods -l app=product-api -o wide
+   ```
+
+   `Service` の `Endpoints` に商品APIのPod IPが表示された。Serviceは `ClusterIP` 型なので、クラスター外へは公開しない。
+
+## 仕組みを図で振り返る
+
+[商品APIの構成図](./minikube商品APIの構成図.md)に、Podを管理する流れとServiceを通る通信の流れを1枚で記録した。
+
+### Podを入れ替えたとき
+
+`kubectl delete pod` で商品APIのPodを削除すると、ReplicaSetが新しいPodを補充した。今回の観察例では、Pod IPは `10.244.0.5` から `10.244.0.6` に変わったが、ServiceのIP `10.103.36.128` は変わらず、`Endpoints` が新しいPod IPに更新された。これらのIPはminikubeが割り当てた今回の値で、再作成時に同じ値になるとは限らない。
+
+### Podを2個に増やしたとき
+
+```bash
+kubectl scale deployment/product-api --replicas=2
+kubectl get pods -l app=product-api -o wide
+kubectl describe service product-api
+```
+
+2つのPodが `Running` になり、Serviceの `Endpoints` に両方のPod IPが表示された。実験後は次のコマンドで、[Deploymentの設定](../k8s/local/product-api/deployment.yaml)と同じ1個に戻した。
+
+```bash
+kubectl scale deployment/product-api --replicas=1
+```
+
+**覚えること：Deployment → ReplicaSet → Podは管理の関係。Service → Podは通信の関係。PodのIPや数が変わっても、呼び出し元は同じService名を使える。**
