@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: product-api
-          image: product-api:local
+          image: product-api:readiness-v1
           imagePullPolicy: Never
           ports:
             - containerPort: 8000
