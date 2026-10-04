@@ -3,6 +3,7 @@ kind: Ingress
 metadata:
   name: product-api
 spec:
+  ingressClassName: traefik
   rules:
     - http:
         paths:
