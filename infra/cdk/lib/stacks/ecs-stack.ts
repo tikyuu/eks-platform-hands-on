@@ -1,6 +1,7 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
-import { ContainerImage, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerImage, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { Repository, TagMutability } from 'aws-cdk-lib/aws-ecr';
+import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 
 export class EcsStack extends Stack {
@@ -12,6 +13,11 @@ export class EcsStack extends Stack {
       imageTagMutability: TagMutability.IMMUTABLE,
     });
 
+    const productApiLogGroup = new LogGroup(this, 'ProductApiLogGroup', {
+      logGroupName: 'ecs-stg-logs-product-api',
+      retention: RetentionDays.ONE_MONTH,
+    });
+
     const productApiTaskDefinition = new FargateTaskDefinition(this, 'ProductApiTaskDefinition', {
       cpu: 256,
       memoryLimitMiB: 512,
@@ -20,6 +26,10 @@ export class EcsStack extends Stack {
     productApiTaskDefinition.addContainer('ProductApiContainer', {
       image: ContainerImage.fromEcrRepository(productApiRepository, 'v1'),
       portMappings: [{ containerPort: 8000 }],
+      logging: new AwsLogDriver({
+        logGroup: productApiLogGroup,
+        streamPrefix: 'product-api',
+      }),
     });
   }
 }
