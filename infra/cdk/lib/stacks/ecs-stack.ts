@@ -1,4 +1,5 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
+import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, Cluster, ContainerImage, FargateService, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { Repository, TagMutability } from 'aws-cdk-lib/aws-ecr';
@@ -26,6 +27,11 @@ export class EcsStack extends Stack {
     const hostedZone = HostedZone.fromHostedZoneAttributes(this, 'EcsApiHostedZone', {
       hostedZoneId: props.domainConfig.hostedZoneId,
       zoneName: props.domainConfig.hostedZoneName,
+    });
+
+    const productApiCertificate = new Certificate(this, 'ProductApiCertificate', {
+      domainName: props.domainConfig.domainName,
+      validation: CertificateValidation.fromDns(hostedZone),
     });
 
     const cluster = new Cluster(this, 'EcsCluster', {
