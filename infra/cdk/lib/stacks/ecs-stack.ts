@@ -1,5 +1,5 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
-import { AwsLogDriver, ContainerImage, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, Cluster, ContainerImage, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { Repository, TagMutability } from 'aws-cdk-lib/aws-ecr';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
@@ -12,6 +12,11 @@ export interface EcsStackProps extends StackProps {
 export class EcsStack extends Stack {
   constructor(scope: Construct, id: string, props: EcsStackProps) {
     super(scope, id, props);
+
+    new Cluster(this, 'EcsCluster', {
+      clusterName: 'ecs-stg-cluster',
+      vpc: props.network.vpcReference,
+    });
 
     const productApiRepository = new Repository(this, 'ProductApiRepository', {
       repositoryName: 'ecs-stg-ecr-product-api',
