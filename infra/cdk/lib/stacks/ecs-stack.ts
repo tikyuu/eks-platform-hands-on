@@ -4,6 +4,7 @@ import { AwsLogDriver, Cluster, ContainerImage, FargateService, FargateTaskDefin
 import { Repository, TagMutability } from 'aws-cdk-lib/aws-ecr';
 import { ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Construct } from 'constructs';
 import { Network } from '../constructs/network/network';
 
@@ -21,6 +22,11 @@ export interface EcsStackProps extends StackProps {
 export class EcsStack extends Stack {
   constructor(scope: Construct, id: string, props: EcsStackProps) {
     super(scope, id, props);
+
+    const hostedZone = HostedZone.fromHostedZoneAttributes(this, 'EcsApiHostedZone', {
+      hostedZoneId: props.domainConfig.hostedZoneId,
+      zoneName: props.domainConfig.hostedZoneName,
+    });
 
     const cluster = new Cluster(this, 'EcsCluster', {
       clusterName: 'ecs-stg-cluster',
