@@ -1,4 +1,4 @@
-import { CfnInternetGateway, CfnNatGateway, CfnRouteTable, CfnSubnet, CfnVPC, CfnVPCGatewayAttachment } from 'aws-cdk-lib/aws-ec2';
+import { CfnInternetGateway, CfnNatGateway, CfnRouteTable, CfnSubnet, CfnVPC, CfnVPCGatewayAttachment, IVpc, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 import { attachInternetGateway, createInternetGateway, createRegionalNatGateway, InternetGatewayConfig, NatGatewayConfig } from './gateway';
 import { associateSubnetRouteTable, createInternetGatewayRoute, createNatGatewayRoute, createRouteTable, RouteTableConfig } from './route-tables';
@@ -19,6 +19,7 @@ export interface NetworkProps {
 
 export class Network extends Construct {
   readonly vpc: CfnVPC;
+  readonly vpcReference: IVpc;
   readonly internetGateway: CfnInternetGateway;
   readonly internetGatewayAttachment: CfnVPCGatewayAttachment;
   readonly natGateway: CfnNatGateway;
@@ -71,6 +72,17 @@ export class Network extends Construct {
 
     this.privateDbSubnets.forEach((subnet) => {
       associateSubnetRouteTable(this, `${subnet.node.id}RouteTableAssociation`, subnet.ref, this.privateDbRouteTable.ref);
+    });
+
+    this.vpcReference = Vpc.fromVpcAttributes(this, 'VpcReference', {
+      vpcId: this.vpc.ref,
+      availabilityZones: props.publicSubnetConfigs.map((config) => config.availabilityZone),
+      publicSubnetIds: this.publicSubnets.map((subnet) => subnet.ref),
+      publicSubnetRouteTableIds: this.publicSubnets.map(() => this.publicRouteTable.ref),
+      privateSubnetIds: this.privateAppSubnets.map((subnet) => subnet.ref),
+      privateSubnetRouteTableIds: this.privateAppSubnets.map(() => this.privateAppRouteTable.ref),
+      isolatedSubnetIds: this.privateDbSubnets.map((subnet) => subnet.ref),
+      isolatedSubnetRouteTableIds: this.privateDbSubnets.map(() => this.privateDbRouteTable.ref),
     });
   }
 }
