@@ -49,6 +49,7 @@ export class EcsStack extends Stack {
       cluster,
       taskDefinition: productApiTaskDefinition,
       desiredCount: 1,
+      circuitBreaker: { enable: true, rollback: true },
       vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
       assignPublicIp: false,
     });
