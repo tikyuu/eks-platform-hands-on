@@ -1,5 +1,5 @@
 import { App } from 'aws-cdk-lib';
-import { stgInternetGatewayConfig, stgNatGatewayConfig, stgPrivateAppRouteTableConfig, stgPrivateAppSubnetConfigs, stgPrivateDbRouteTableConfig, stgPrivateDbSubnetConfigs, stgPublicRouteTableConfig, stgPublicSubnetConfigs, stgVpcConfig } from '../lib/config/stg';
+import { stgEcsApiDomainConfig, stgInternetGatewayConfig, stgNatGatewayConfig, stgPrivateAppRouteTableConfig, stgPrivateAppSubnetConfigs, stgPrivateDbRouteTableConfig, stgPrivateDbSubnetConfigs, stgPublicRouteTableConfig, stgPublicSubnetConfigs, stgVpcConfig } from '../lib/config/stg';
 import { EcsStack } from '../lib/stacks/ecs-stack';
 import { NetworkStack } from '../lib/stacks/network-stack';
 
@@ -17,6 +17,9 @@ const networkStack = new NetworkStack(app, 'NetworkStack', {
   privateDbSubnetConfigs: stgPrivateDbSubnetConfigs,
 });
 
-new EcsStack(app, 'EcsStack', { network: networkStack.network });
+new EcsStack(app, 'EcsStack', {
+  network: networkStack.network,
+  domainConfig: stgEcsApiDomainConfig,
+});
 
 app.synth();
