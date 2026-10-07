@@ -44,7 +44,7 @@ export class EcsStack extends Stack {
       }),
     });
 
-    new FargateService(this, 'ProductApiService', {
+    const productApiService = new FargateService(this, 'ProductApiService', {
       serviceName: 'ecs-stg-service-product-api',
       cluster,
       taskDefinition: productApiTaskDefinition,
@@ -75,5 +75,7 @@ export class EcsStack extends Stack {
       open: true,
       defaultTargetGroups: [productApiTargetGroup],
     });
+
+    productApiTargetGroup.addTarget(productApiService);
   }
 }
