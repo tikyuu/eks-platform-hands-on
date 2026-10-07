@@ -2,6 +2,7 @@ import { Stack, StackProps } from 'aws-cdk-lib';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, Cluster, ContainerImage, FargateService, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { Repository, TagMutability } from 'aws-cdk-lib/aws-ecr';
+import { ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import { Network } from '../constructs/network/network';
@@ -50,6 +51,22 @@ export class EcsStack extends Stack {
       desiredCount: 1,
       vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
       assignPublicIp: false,
+    });
+
+    new ApplicationLoadBalancer(this, 'ProductApiAlb', {
+      loadBalancerName: 'ecs-stg-alb-product-api',
+      vpc: props.network.vpcReference,
+      internetFacing: true,
+      vpcSubnets: { subnetType: SubnetType.PUBLIC },
+    });
+
+    new ApplicationTargetGroup(this, 'ProductApiTargetGroup', {
+      targetGroupName: 'ecs-stg-tg-product-api',
+      vpc: props.network.vpcReference,
+      port: 8000,
+      protocol: ApplicationProtocol.HTTP,
+      targetType: TargetType.IP,
+      healthCheck: { path: '/readyz' },
     });
   }
 }
