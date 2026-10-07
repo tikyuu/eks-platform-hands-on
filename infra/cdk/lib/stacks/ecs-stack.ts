@@ -7,8 +7,15 @@ import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import { Network } from '../constructs/network/network';
 
+export interface EcsApiDomainConfig {
+  readonly domainName: string;
+  readonly hostedZoneName: string;
+  readonly hostedZoneId: string;
+}
+
 export interface EcsStackProps extends StackProps {
   readonly network: Network;
+  readonly domainConfig: EcsApiDomainConfig;
 }
 
 export class EcsStack extends Stack {
