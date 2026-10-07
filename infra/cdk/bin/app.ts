@@ -5,7 +5,7 @@ import { NetworkStack } from '../lib/stacks/network-stack';
 
 const app = new App();
 
-new NetworkStack(app, 'NetworkStack', {
+const networkStack = new NetworkStack(app, 'NetworkStack', {
   vpcConfig: stgVpcConfig,
   internetGatewayConfig: stgInternetGatewayConfig,
   natGatewayConfig: stgNatGatewayConfig,
@@ -17,6 +17,6 @@ new NetworkStack(app, 'NetworkStack', {
   privateDbSubnetConfigs: stgPrivateDbSubnetConfigs,
 });
 
-new EcsStack(app, 'EcsStack', {});
+new EcsStack(app, 'EcsStack', { network: networkStack.network });
 
 app.synth();

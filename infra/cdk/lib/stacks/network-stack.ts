@@ -19,10 +19,12 @@ export interface NetworkStackProps extends StackProps {
 }
 
 export class NetworkStack extends Stack {
+  readonly network: Network;
+
   constructor(scope: Construct, id: string, props: NetworkStackProps) {
     super(scope, id, props);
 
-    new Network(this, 'Network', {
+    this.network = new Network(this, 'Network', {
       vpcConfig: props.vpcConfig,
       internetGatewayConfig: props.internetGatewayConfig,
       natGatewayConfig: props.natGatewayConfig,

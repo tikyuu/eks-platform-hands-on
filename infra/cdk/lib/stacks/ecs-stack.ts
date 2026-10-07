@@ -3,9 +3,14 @@ import { AwsLogDriver, ContainerImage, FargateTaskDefinition } from 'aws-cdk-lib
 import { Repository, TagMutability } from 'aws-cdk-lib/aws-ecr';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
+import { Network } from '../constructs/network/network';
+
+export interface EcsStackProps extends StackProps {
+  readonly network: Network;
+}
 
 export class EcsStack extends Stack {
-  constructor(scope: Construct, id: string, props: StackProps) {
+  constructor(scope: Construct, id: string, props: EcsStackProps) {
     super(scope, id, props);
 
     const productApiRepository = new Repository(this, 'ProductApiRepository', {
