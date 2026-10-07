@@ -3,7 +3,7 @@ import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatem
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, Cluster, ContainerImage, FargateService, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { Repository, TagMutability } from 'aws-cdk-lib/aws-ecr';
-import { ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Construct } from 'constructs';
@@ -92,6 +92,18 @@ export class EcsStack extends Stack {
     productApiAlb.addListener('ProductApiHttpListener', {
       port: 80,
       protocol: ApplicationProtocol.HTTP,
+      open: true,
+      defaultAction: ListenerAction.redirect({
+        protocol: ApplicationProtocol.HTTPS,
+        port: '443',
+        permanent: true,
+      }),
+    });
+
+    productApiAlb.addListener('ProductApiHttpsListener', {
+      port: 443,
+      protocol: ApplicationProtocol.HTTPS,
+      certificates: [productApiCertificate],
       open: true,
       defaultTargetGroups: [productApiTargetGroup],
     });
