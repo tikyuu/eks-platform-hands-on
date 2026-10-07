@@ -1,5 +1,6 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
-import { AwsLogDriver, Cluster, ContainerImage, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { AwsLogDriver, Cluster, ContainerImage, FargateService, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { Repository, TagMutability } from 'aws-cdk-lib/aws-ecr';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
@@ -13,7 +14,7 @@ export class EcsStack extends Stack {
   constructor(scope: Construct, id: string, props: EcsStackProps) {
     super(scope, id, props);
 
-    new Cluster(this, 'EcsCluster', {
+    const cluster = new Cluster(this, 'EcsCluster', {
       clusterName: 'ecs-stg-cluster',
       vpc: props.network.vpcReference,
     });
@@ -40,6 +41,15 @@ export class EcsStack extends Stack {
         logGroup: productApiLogGroup,
         streamPrefix: 'product-api',
       }),
+    });
+
+    new FargateService(this, 'ProductApiService', {
+      serviceName: 'ecs-stg-service-product-api',
+      cluster,
+      taskDefinition: productApiTaskDefinition,
+      desiredCount: 1,
+      vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
+      assignPublicIp: false,
     });
   }
 }
