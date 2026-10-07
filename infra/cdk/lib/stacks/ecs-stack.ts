@@ -53,20 +53,27 @@ export class EcsStack extends Stack {
       assignPublicIp: false,
     });
 
-    new ApplicationLoadBalancer(this, 'ProductApiAlb', {
+    const productApiAlb = new ApplicationLoadBalancer(this, 'ProductApiAlb', {
       loadBalancerName: 'ecs-stg-alb-product-api',
       vpc: props.network.vpcReference,
       internetFacing: true,
       vpcSubnets: { subnetType: SubnetType.PUBLIC },
     });
 
-    new ApplicationTargetGroup(this, 'ProductApiTargetGroup', {
+    const productApiTargetGroup = new ApplicationTargetGroup(this, 'ProductApiTargetGroup', {
       targetGroupName: 'ecs-stg-tg-product-api',
       vpc: props.network.vpcReference,
       port: 8000,
       protocol: ApplicationProtocol.HTTP,
       targetType: TargetType.IP,
       healthCheck: { path: '/readyz' },
+    });
+
+    productApiAlb.addListener('ProductApiHttpListener', {
+      port: 80,
+      protocol: ApplicationProtocol.HTTP,
+      open: true,
+      defaultTargetGroups: [productApiTargetGroup],
     });
   }
 }
