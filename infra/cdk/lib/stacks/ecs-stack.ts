@@ -86,6 +86,15 @@ export class EcsStack extends Stack {
       healthCheck: { path: '/readyz' },
     });
 
+    const productApiAlternateTargetGroup = new ApplicationTargetGroup(this, 'ProductApiAlternateTargetGroup', {
+      targetGroupName: 'ecs-stg-tg-product-api-alt',
+      vpc: props.network.vpcReference,
+      port: 8000,
+      protocol: ApplicationProtocol.HTTP,
+      targetType: TargetType.IP,
+      healthCheck: { path: '/readyz' },
+    });
+
     productApiAlb.addListener('ProductApiHttpListener', {
       port: 80,
       protocol: ApplicationProtocol.HTTP,
