@@ -3,7 +3,7 @@ import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatem
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, Cluster, ContainerImage, FargateService, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { IRepository } from 'aws-cdk-lib/aws-ecr';
-import { ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, ListenerCondition, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { ARecord, HostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
@@ -106,12 +106,19 @@ export class EcsStack extends Stack {
       }),
     });
 
-    productApiAlb.addListener('ProductApiHttpsListener', {
+    const productApiHttpsListener = productApiAlb.addListener('ProductApiHttpsListener', {
       port: 443,
       protocol: ApplicationProtocol.HTTPS,
       certificates: [productApiCertificate],
       open: true,
-      defaultTargetGroups: [productApiTargetGroup],
+      defaultAction: ListenerAction.fixedResponse(404),
+    });
+
+    const productApiProductionRule = new ApplicationListenerRule(this, 'ProductApiProductionRule', {
+      listener: productApiHttpsListener,
+      priority: 1,
+      conditions: [ListenerCondition.pathPatterns(['/*'])],
+      action: ListenerAction.forward([productApiTargetGroup]),
     });
 
     new ARecord(this, 'ProductApiAliasRecord', {
