@@ -2,7 +2,7 @@ import { Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { AwsLogDriver, Cluster, ContainerImage, FargateService, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
-import { Repository, TagMutability } from 'aws-cdk-lib/aws-ecr';
+import { IRepository } from 'aws-cdk-lib/aws-ecr';
 import { ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { ARecord, HostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
@@ -19,6 +19,7 @@ export interface EcsApiDomainConfig {
 export interface EcsStackProps extends StackProps {
   readonly network: Network;
   readonly domainConfig: EcsApiDomainConfig;
+  readonly productApiRepository: IRepository;
 }
 
 export class EcsStack extends Stack {
@@ -40,11 +41,6 @@ export class EcsStack extends Stack {
       vpc: props.network.vpcReference,
     });
 
-    const productApiRepository = new Repository(this, 'ProductApiRepository', {
-      repositoryName: 'ecs-stg-ecr-product-api',
-      imageTagMutability: TagMutability.IMMUTABLE,
-    });
-
     const productApiLogGroup = new LogGroup(this, 'ProductApiLogGroup', {
       logGroupName: 'ecs-stg-logs-product-api',
       retention: RetentionDays.ONE_MONTH,
@@ -56,7 +52,7 @@ export class EcsStack extends Stack {
     });
 
     productApiTaskDefinition.addContainer('ProductApiContainer', {
-      image: ContainerImage.fromEcrRepository(productApiRepository, 'v1'),
+      image: ContainerImage.fromEcrRepository(props.productApiRepository, 'v1'),
       portMappings: [{ containerPort: 8000 }],
       logging: new AwsLogDriver({
         logGroup: productApiLogGroup,
