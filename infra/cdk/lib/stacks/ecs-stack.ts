@@ -5,7 +5,8 @@ import { AwsLogDriver, Cluster, ContainerImage, FargateService, FargateTaskDefin
 import { Repository, TagMutability } from 'aws-cdk-lib/aws-ecr';
 import { ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { HostedZone } from 'aws-cdk-lib/aws-route53';
+import { ARecord, HostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
+import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { Construct } from 'constructs';
 import { Network } from '../constructs/network/network';
 
@@ -106,6 +107,12 @@ export class EcsStack extends Stack {
       certificates: [productApiCertificate],
       open: true,
       defaultTargetGroups: [productApiTargetGroup],
+    });
+
+    new ARecord(this, 'ProductApiAliasRecord', {
+      zone: hostedZone,
+      recordName: `${props.domainConfig.domainName}.`,
+      target: RecordTarget.fromAlias(new LoadBalancerTarget(productApiAlb)),
     });
 
     productApiTargetGroup.addTarget(productApiService);
