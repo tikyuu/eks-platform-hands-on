@@ -21,7 +21,7 @@ const networkStack = new NetworkStack(app, 'NetworkStack', {
 
 const ecrStack = new EcrStack(app, 'EcrStack');
 
-new DatabaseStack(app, 'DatabaseStack', {
+const databaseStack = new DatabaseStack(app, 'DatabaseStack', {
   network: networkStack.network,
 });
 
@@ -29,6 +29,7 @@ new EcsStack(app, 'EcsStack', {
   network: networkStack.network,
   domainConfig: stgEcsApiDomainConfig,
   productApiRepository: ecrStack.productApiRepository,
+  databaseSecurityGroup: databaseStack.databaseSecurityGroup,
 });
 
 app.synth();

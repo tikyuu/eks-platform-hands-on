@@ -1,7 +1,7 @@
 import { Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { Alarm, ComparisonOperator, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
-import { SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { ISecurityGroup, Port, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { AlarmBehavior, AlternateTarget, AwsLogDriver, Cluster, ContainerImage, DeploymentStrategy, FargateService, FargateTaskDefinition, ListenerRuleConfiguration } from 'aws-cdk-lib/aws-ecs';
 import { IRepository } from 'aws-cdk-lib/aws-ecr';
 import { ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, HttpCodeTarget, ListenerAction, ListenerCondition, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -21,6 +21,7 @@ export interface EcsStackProps extends StackProps {
   readonly network: Network;
   readonly domainConfig: EcsApiDomainConfig;
   readonly productApiRepository: IRepository;
+  readonly databaseSecurityGroup: ISecurityGroup;
 }
 
 export class EcsStack extends Stack {
@@ -71,6 +72,16 @@ export class EcsStack extends Stack {
       circuitBreaker: { enable: true, rollback: true },
       vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
       assignPublicIp: false,
+    });
+
+    // Keep the rule in EcsStack so DatabaseStack does not depend on EcsStack.
+    productApiService.connections.securityGroups.forEach((securityGroup) => {
+      props.databaseSecurityGroup.addIngressRule(
+        securityGroup,
+        Port.tcp(5432),
+        'Allow PostgreSQL from product API tasks',
+        true,
+      );
     });
 
     const productApiAlb = new ApplicationLoadBalancer(this, 'ProductApiAlb', {
