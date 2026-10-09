@@ -1,7 +1,7 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
-import { AwsLogDriver, Cluster, ContainerImage, FargateService, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { AlternateTarget, AwsLogDriver, Cluster, ContainerImage, FargateService, FargateTaskDefinition, ListenerRuleConfiguration } from 'aws-cdk-lib/aws-ecs';
 import { IRepository } from 'aws-cdk-lib/aws-ecr';
 import { ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, ListenerCondition, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -119,6 +119,11 @@ export class EcsStack extends Stack {
       priority: 1,
       conditions: [ListenerCondition.pathPatterns(['/*'])],
       action: ListenerAction.forward([productApiTargetGroup]),
+    });
+
+    const productApiAlternateTarget = new AlternateTarget('ProductApiAlternateTarget', {
+      alternateTargetGroup: productApiAlternateTargetGroup,
+      productionListener: ListenerRuleConfiguration.applicationListenerRule(productApiProductionRule),
     });
 
     new ARecord(this, 'ProductApiAliasRecord', {
