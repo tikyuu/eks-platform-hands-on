@@ -1,7 +1,7 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
-import { AlternateTarget, AwsLogDriver, Cluster, ContainerImage, FargateService, FargateTaskDefinition, ListenerRuleConfiguration } from 'aws-cdk-lib/aws-ecs';
+import { AlternateTarget, AwsLogDriver, Cluster, ContainerImage, DeploymentStrategy, FargateService, FargateTaskDefinition, ListenerRuleConfiguration } from 'aws-cdk-lib/aws-ecs';
 import { IRepository } from 'aws-cdk-lib/aws-ecr';
 import { ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, ListenerCondition, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -65,6 +65,8 @@ export class EcsStack extends Stack {
       cluster,
       taskDefinition: productApiTaskDefinition,
       desiredCount: 1,
+      deploymentStrategy: DeploymentStrategy.BLUE_GREEN,
+      bakeTime: Duration.minutes(5),
       circuitBreaker: { enable: true, rollback: true },
       vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
       assignPublicIp: false,
