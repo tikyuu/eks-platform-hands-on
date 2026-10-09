@@ -1,9 +1,10 @@
 import { Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
+import { Alarm, ComparisonOperator, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
-import { AlternateTarget, AwsLogDriver, Cluster, ContainerImage, DeploymentStrategy, FargateService, FargateTaskDefinition, ListenerRuleConfiguration } from 'aws-cdk-lib/aws-ecs';
+import { AlarmBehavior, AlternateTarget, AwsLogDriver, Cluster, ContainerImage, DeploymentStrategy, FargateService, FargateTaskDefinition, ListenerRuleConfiguration } from 'aws-cdk-lib/aws-ecs';
 import { IRepository } from 'aws-cdk-lib/aws-ecr';
-import { ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, ListenerAction, ListenerCondition, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, HttpCodeTarget, ListenerAction, ListenerCondition, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { ARecord, HostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
@@ -78,6 +79,24 @@ export class EcsStack extends Stack {
       internetFacing: true,
       vpcSubnets: { subnetType: SubnetType.PUBLIC },
     });
+
+    const productApiServerErrorAlarm = new Alarm(this, 'ProductApiServerErrorAlarm', {
+      alarmName: 'ecs-stg-alarm-product-api-5xx',
+      metric: productApiAlb.metrics.httpCodeTarget(HttpCodeTarget.TARGET_5XX_COUNT, {
+        period: Duration.minutes(1),
+        statistic: 'Sum',
+      }),
+      threshold: 1,
+      evaluationPeriods: 1,
+      datapointsToAlarm: 1,
+      comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      treatMissingData: TreatMissingData.NOT_BREACHING,
+    });
+
+    productApiService.enableDeploymentAlarms(
+      [productApiServerErrorAlarm.alarmName],
+      { behavior: AlarmBehavior.ROLLBACK_ON_ALARM },
+    );
 
     const productApiTargetGroup = new ApplicationTargetGroup(this, 'ProductApiTargetGroup', {
       targetGroupName: 'ecs-stg-tg-product-api',
