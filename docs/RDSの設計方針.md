@@ -12,7 +12,7 @@ RDSを`DatabaseStack`に分離し、既存の`NetworkStack`のVPCとDB用サブ�
 | --- | --- | --- |
 | DBエンジン | RDS for PostgreSQL 18.6 | 実装時点で東京リージョンのdb.t4g.microに対応する最新の正式版 |
 | RDSインスタンス名 | `ecs-stg-rds` | 商品API専用という名前にせず、今後の機能拡張にも使う |
-| DB名 | `ec_app` | PostgreSQL内部のデータベース名 |
+| DB名 | `ecs_app` | PostgreSQL内部のデータベース名 |
 | インスタンスサイズ | `db.t4g.micro`（2 vCPU・1 GiB） | 少量データのstgとして最小サイズから実測する |
 | 可用性 | Single-AZ | 費用を抑え、一時停止を許容する。別AZの待機DBは作らない |
 | 配置 | 既存のプライベートDBサブネット | インターネット向けのデフォルトルートを持たないサブネット |
