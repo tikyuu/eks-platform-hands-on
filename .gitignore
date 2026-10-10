@@ -16,3 +16,6 @@ crash.*.log
 # Python local files
 /apps/product-api/.venv/
 __pycache__/
+
+# Local environment variables
+/.env

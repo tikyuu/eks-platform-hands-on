@@ -37,7 +37,7 @@ export class DatabaseStack extends Stack {
 
     this.database = new DatabaseInstance(this, 'Database', {
       instanceIdentifier: 'ecs-stg-rds',
-      databaseName: 'ec_app',
+      databaseName: 'ecs_app',
       engine: DatabaseInstanceEngine.postgres({
         version: PostgresEngineVersion.of('18.6', '18'),
       }),
