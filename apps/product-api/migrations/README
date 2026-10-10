@@ -1,0 +1,26 @@
+商品APIのDB構造変更を管理するためのAlembic実行環境です。
+
+ファイルの役割
+- ../alembic.ini: 変更ファイルの保存場所やログの設定。
+- env.py: 接続情報を取得し、変更を実行する処理。
+- script.py.mako: 新しい変更ファイルを生成するためのひな形。
+- versions/: テーブル作成・変更の履歴ファイルを保存する場所。
+
+接続情報
+- 環境変数MIGRATION_DATABASE_URLを、コマンドを実行する環境に設定します。
+- 形式: postgresql+psycopg://ユーザー名:パスワード@接続先:5432/DB名
+- ローカルでは接続先127.0.0.1、DB名ecs_app、管理ユーザーdb_adminを使います。
+- パスワードなどにURLの予約文字を含む場合はURLエンコードが必要です。
+- この処理はリポジトリ直下の.envを自動では読み込みません。
+- アプリ用の読み取り専用ユーザーではなく、構造変更の権限を持つユーザーを使います。
+- 実際の接続情報をソースコードやGitに保存しないでください。
+
+コマンド（apps/product-api/から実行）
+- uv run alembic history: 保存された変更履歴を表示。DBには接続しません。
+- uv run alembic revision -m "変更の説明": versions/に変更ファイルを生成。
+- uv run alembic upgrade head --sql: 適用するSQLを出力。DBは変更しません。
+- uv run alembic upgrade head: 対象DBに未適用の変更を適用します。
+
+現在は初期設定のみです。商品テーブルの変更ファイルはまだありません。
+target_metadataは未設定なので、--autogenerateによる自動生成はまだ使えません。
+DBへの適用は、変更内容と接続先を確認してから実行してください。
