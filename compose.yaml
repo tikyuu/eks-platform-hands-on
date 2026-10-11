@@ -16,5 +16,20 @@ services:
       retries: 5
       start_period: 10s
 
+  product-api:
+    build:
+      context: ./apps/product-api
+    environment:
+      PRODUCT_API_DB_HOST: db
+      PRODUCT_API_DB_PORT: "5432"
+      PRODUCT_API_DB_NAME: ecs_app
+      PRODUCT_API_DB_USER: product_api_app
+      PRODUCT_API_DB_PASSWORD: ${PRODUCT_API_DB_PASSWORD:?API用パスワードを設定してください}
+    ports:
+      - "127.0.0.1:8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   postgres_data:
