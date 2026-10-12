@@ -29,6 +29,7 @@ new EcsStack(app, 'EcsStack', {
   network: networkStack.network,
   domainConfig: stgEcsApiDomainConfig,
   productApiRepository: ecrStack.productApiRepository,
+  storefrontRepository: ecrStack.storefrontRepository,
   databaseSecurityGroup: databaseStack.databaseSecurityGroup,
 });
 
