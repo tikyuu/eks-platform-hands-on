@@ -1,7 +1,10 @@
 import { Suspense } from "react";
+import { connection } from "next/server";
 import { getProducts, type Product } from "@/lib/products";
 
 async function ProductList() {
+  await connection();
+
   let products: Product[];
 
   try {
