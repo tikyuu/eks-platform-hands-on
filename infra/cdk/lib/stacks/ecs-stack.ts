@@ -49,9 +49,28 @@ export class EcsStack extends Stack {
       retention: RetentionDays.ONE_MONTH,
     });
 
+    const storefrontLogGroup = new LogGroup(this, 'StorefrontLogGroup', {
+      logGroupName: 'ecs-stg-logs-storefront',
+      retention: RetentionDays.ONE_MONTH,
+    });
+
     const productApiTaskDefinition = new FargateTaskDefinition(this, 'ProductApiTaskDefinition', {
       cpu: 256,
       memoryLimitMiB: 512,
+    });
+
+    const storefrontTaskDefinition = new FargateTaskDefinition(this, 'StorefrontTaskDefinition', {
+      cpu: 256,
+      memoryLimitMiB: 512,
+    });
+
+    storefrontTaskDefinition.addContainer('StorefrontContainer', {
+      image: ContainerImage.fromEcrRepository(props.storefrontRepository, 'v1'),
+      portMappings: [{ containerPort: 3000 }],
+      logging: new AwsLogDriver({
+        logGroup: storefrontLogGroup,
+        streamPrefix: 'storefront',
+      }),
     });
 
     productApiTaskDefinition.addContainer('ProductApiContainer', {
