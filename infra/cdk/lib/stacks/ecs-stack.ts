@@ -225,6 +225,14 @@ export class EcsStack extends Stack {
       target: RecordTarget.fromAlias(new LoadBalancerTarget(productApiAlb)),
     });
 
+    storefrontTargetGroup.addTarget(
+      storefrontService.loadBalancerTarget({
+        containerName: 'StorefrontContainer',
+        containerPort: 3000,
+        alternateTarget: storefrontAlternateTarget,
+      }),
+    );
+
     productApiTargetGroup.addTarget(
       productApiService.loadBalancerTarget({
         containerName: 'ProductApiContainer',
