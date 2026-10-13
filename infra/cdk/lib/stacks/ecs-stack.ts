@@ -73,6 +73,13 @@ export class EcsStack extends Stack {
       }),
     });
 
+    const storefrontService = new FargateService(this, 'StorefrontService', {
+      serviceName: 'ecs-stg-service-storefront',
+      cluster,
+      taskDefinition: storefrontTaskDefinition,
+      desiredCount: 1,
+    });
+
     productApiTaskDefinition.addContainer('ProductApiContainer', {
       image: ContainerImage.fromEcrRepository(props.productApiRepository, 'v1'),
       portMappings: [{ containerPort: 8000 }],
