@@ -40,7 +40,7 @@ def readiness():
     return {"status": "ok"}
 
 
-@app.get("/products")
+@app.get("/api/products")
 def list_products(request: Request):
     statement = sa.select(products).order_by(products.c.id)
     try:
