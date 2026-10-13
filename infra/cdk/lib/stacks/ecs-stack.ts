@@ -78,6 +78,8 @@ export class EcsStack extends Stack {
       cluster,
       taskDefinition: storefrontTaskDefinition,
       desiredCount: 1,
+      deploymentStrategy: DeploymentStrategy.BLUE_GREEN,
+      bakeTime: Duration.minutes(5),
       vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
       assignPublicIp: false,
     });
@@ -137,6 +139,24 @@ export class EcsStack extends Stack {
       [productApiServerErrorAlarm.alarmName],
       { behavior: AlarmBehavior.ROLLBACK_ON_ALARM },
     );
+
+    const storefrontTargetGroup = new ApplicationTargetGroup(this, 'StorefrontTargetGroup', {
+      targetGroupName: 'ecs-stg-tg-storefront',
+      vpc: props.network.vpcReference,
+      port: 3000,
+      protocol: ApplicationProtocol.HTTP,
+      targetType: TargetType.IP,
+      healthCheck: { path: '/readyz' },
+    });
+
+    const storefrontAlternateTargetGroup = new ApplicationTargetGroup(this, 'StorefrontAlternateTargetGroup', {
+      targetGroupName: 'ecs-stg-tg-storefront-alt',
+      vpc: props.network.vpcReference,
+      port: 3000,
+      protocol: ApplicationProtocol.HTTP,
+      targetType: TargetType.IP,
+      healthCheck: { path: '/readyz' },
+    });
 
     const productApiTargetGroup = new ApplicationTargetGroup(this, 'ProductApiTargetGroup', {
       targetGroupName: 'ecs-stg-tg-product-api',
