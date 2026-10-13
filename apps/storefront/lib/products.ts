@@ -29,7 +29,7 @@ export async function getProducts(): Promise<Product[]> {
     throw new Error("PRODUCT_API_BASE_URLを設定してください。");
   }
 
-  const response = await fetch(`${baseUrl.replace(/\/$/, "")}/products`, {
+  const response = await fetch(`${baseUrl.replace(/\/$/, "")}/api/products`, {
     cache: "no-store",
     signal: AbortSignal.timeout(5000),
   });
