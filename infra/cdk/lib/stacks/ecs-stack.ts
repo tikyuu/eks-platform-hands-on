@@ -198,8 +198,20 @@ export class EcsStack extends Stack {
     const productApiProductionRule = new ApplicationListenerRule(this, 'ProductApiProductionRule', {
       listener: productApiHttpsListener,
       priority: 1,
-      conditions: [ListenerCondition.pathPatterns(['/*'])],
+      conditions: [ListenerCondition.pathPatterns(['/api', '/api/*'])],
       action: ListenerAction.forward([productApiTargetGroup]),
+    });
+
+    const storefrontProductionRule = new ApplicationListenerRule(this, 'StorefrontProductionRule', {
+      listener: productApiHttpsListener,
+      priority: 2,
+      conditions: [ListenerCondition.pathPatterns(['/*'])],
+      action: ListenerAction.forward([storefrontTargetGroup]),
+    });
+
+    const storefrontAlternateTarget = new AlternateTarget('StorefrontAlternateTarget', {
+      alternateTargetGroup: storefrontAlternateTargetGroup,
+      productionListener: ListenerRuleConfiguration.applicationListenerRule(storefrontProductionRule),
     });
 
     const productApiAlternateTarget = new AlternateTarget('ProductApiAlternateTarget', {

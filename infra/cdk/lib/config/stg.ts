@@ -83,7 +83,7 @@ export const stgPrivateDbSubnetConfigs: readonly SubnetConfig[] = [
 ];
 
 export const stgEcsApiDomainConfig = {
-  domainName: 'ecs-stg-api.tikyuu.click',
+  domainName: 'ecs-stg.tikyuu.click',
   hostedZoneName: 'tikyuu.click',
   hostedZoneId: 'Z06251752UDDGYJM4C7LL',
 };
