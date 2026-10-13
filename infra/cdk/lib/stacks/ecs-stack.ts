@@ -79,6 +79,7 @@ export class EcsStack extends Stack {
       taskDefinition: storefrontTaskDefinition,
       desiredCount: 1,
       vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
+      assignPublicIp: false,
     });
 
     productApiTaskDefinition.addContainer('ProductApiContainer', {
