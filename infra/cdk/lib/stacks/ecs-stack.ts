@@ -8,6 +8,7 @@ import { ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, 
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { ARecord, HostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
+import { HttpNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 import { Network } from '../constructs/network/network';
 
@@ -42,6 +43,15 @@ export class EcsStack extends Stack {
     const cluster = new Cluster(this, 'EcsCluster', {
       clusterName: 'ecs-stg-cluster',
       vpc: props.network.vpcReference,
+    });
+
+    const serviceConnectNamespace = new HttpNamespace(this, 'ServiceConnectNamespace', {
+      name: 'ecs-stg-namespace',
+    });
+
+    cluster.addExistingDefaultCloudMapNamespace({
+      namespace: serviceConnectNamespace,
+      useForServiceConnect: true,
     });
 
     const productApiLogGroup = new LogGroup(this, 'ProductApiLogGroup', {
