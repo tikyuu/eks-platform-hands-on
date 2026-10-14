@@ -77,6 +77,9 @@ export class EcsStack extends Stack {
     storefrontTaskDefinition.addContainer('StorefrontContainer', {
       image: ContainerImage.fromEcrRepository(props.storefrontRepository, 'v1'),
       portMappings: [{ containerPort: 3000 }],
+      environment: {
+        PRODUCT_API_BASE_URL: 'http://product-api:8000',
+      },
       logging: new AwsLogDriver({
         logGroup: storefrontLogGroup,
         streamPrefix: 'storefront',
@@ -87,6 +90,7 @@ export class EcsStack extends Stack {
       serviceName: 'ecs-stg-service-storefront',
       cluster,
       taskDefinition: storefrontTaskDefinition,
+      serviceConnectConfiguration: {},
       desiredCount: 1,
       deploymentStrategy: DeploymentStrategy.BLUE_GREEN,
       bakeTime: Duration.minutes(5),
@@ -117,6 +121,12 @@ export class EcsStack extends Stack {
       vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
       assignPublicIp: false,
     });
+
+    productApiService.connections.allowFrom(
+      storefrontService,
+      Port.tcp(8000),
+      'Allow product API requests from storefront',
+    );
 
     // Keep the rule in EcsStack so DatabaseStack does not depend on EcsStack.
     productApiService.connections.securityGroups.forEach((securityGroup) => {
