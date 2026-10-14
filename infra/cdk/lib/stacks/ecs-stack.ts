@@ -65,13 +65,13 @@ export class EcsStack extends Stack {
     });
 
     const productApiTaskDefinition = new FargateTaskDefinition(this, 'ProductApiTaskDefinition', {
-      cpu: 256,
-      memoryLimitMiB: 512,
+      cpu: 512,
+      memoryLimitMiB: 1024,
     });
 
     const storefrontTaskDefinition = new FargateTaskDefinition(this, 'StorefrontTaskDefinition', {
-      cpu: 256,
-      memoryLimitMiB: 512,
+      cpu: 512,
+      memoryLimitMiB: 1024,
     });
 
     storefrontTaskDefinition.addContainer('StorefrontContainer', {
@@ -96,7 +96,7 @@ export class EcsStack extends Stack {
 
     productApiTaskDefinition.addContainer('ProductApiContainer', {
       image: ContainerImage.fromEcrRepository(props.productApiRepository, 'v1'),
-      portMappings: [{ containerPort: 8000 }],
+      portMappings: [{ containerPort: 8000, name: 'product-api' }],
       logging: new AwsLogDriver({
         logGroup: productApiLogGroup,
         streamPrefix: 'product-api',
@@ -107,6 +107,9 @@ export class EcsStack extends Stack {
       serviceName: 'ecs-stg-service-product-api',
       cluster,
       taskDefinition: productApiTaskDefinition,
+      serviceConnectConfiguration: {
+        services: [{ portMappingName: 'product-api', dnsName: 'product-api', port: 8000 }],
+      },
       desiredCount: 1,
       deploymentStrategy: DeploymentStrategy.BLUE_GREEN,
       bakeTime: Duration.minutes(5),
