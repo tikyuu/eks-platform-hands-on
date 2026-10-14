@@ -6,6 +6,7 @@ import { AlarmBehavior, AlternateTarget, AwsLogDriver, CfnService, Cluster, Cont
 import { IRepository } from 'aws-cdk-lib/aws-ecr';
 import { ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, HttpCodeTarget, ListenerAction, ListenerCondition, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { IDatabaseInstance } from 'aws-cdk-lib/aws-rds';
 import { ARecord, HostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { HttpNamespace } from 'aws-cdk-lib/aws-servicediscovery';
@@ -23,6 +24,7 @@ export interface EcsStackProps extends StackProps {
   readonly domainConfig: EcsApiDomainConfig;
   readonly productApiRepository: IRepository;
   readonly storefrontRepository: IRepository;
+  readonly database: IDatabaseInstance;
   readonly databaseSecurityGroup: ISecurityGroup;
 }
 
@@ -111,6 +113,10 @@ export class EcsStack extends Stack {
     productApiTaskDefinition.addContainer('ProductApiContainer', {
       image: ContainerImage.fromEcrRepository(props.productApiRepository, 'v1'),
       portMappings: [{ containerPort: 8000, name: 'product-api' }],
+      environment: {
+        PRODUCT_API_DB_HOST: props.database.dbInstanceEndpointAddress,
+        PRODUCT_API_DB_PORT: props.database.dbInstanceEndpointPort,
+      },
       logging: new AwsLogDriver({
         logGroup: productApiLogGroup,
         streamPrefix: 'product-api',
