@@ -2,7 +2,7 @@ import { Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { Alarm, ComparisonOperator, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { ISecurityGroup, Port, SubnetType } from 'aws-cdk-lib/aws-ec2';
-import { AlarmBehavior, AlternateTarget, AwsLogDriver, Cluster, ContainerImage, DeploymentStrategy, FargateService, FargateTaskDefinition, ListenerRuleConfiguration } from 'aws-cdk-lib/aws-ecs';
+import { AlarmBehavior, AlternateTarget, AwsLogDriver, CfnService, Cluster, ContainerImage, DeploymentStrategy, FargateService, FargateTaskDefinition, ListenerRuleConfiguration } from 'aws-cdk-lib/aws-ecs';
 import { IRepository } from 'aws-cdk-lib/aws-ecr';
 import { ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, HttpCodeTarget, ListenerAction, ListenerCondition, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -64,6 +64,11 @@ export class EcsStack extends Stack {
       retention: RetentionDays.ONE_MONTH,
     });
 
+    const serviceConnectLogGroup = new LogGroup(this, 'ServiceConnectLogGroup', {
+      logGroupName: 'ecs-stg-logs-service-connect',
+      retention: RetentionDays.ONE_MONTH,
+    });
+
     const productApiTaskDefinition = new FargateTaskDefinition(this, 'ProductApiTaskDefinition', {
       cpu: 512,
       memoryLimitMiB: 1024,
@@ -90,7 +95,12 @@ export class EcsStack extends Stack {
       serviceName: 'ecs-stg-service-storefront',
       cluster,
       taskDefinition: storefrontTaskDefinition,
-      serviceConnectConfiguration: {},
+      serviceConnectConfiguration: {
+        logDriver: new AwsLogDriver({
+          logGroup: serviceConnectLogGroup,
+          streamPrefix: 'storefront',
+        }),
+      },
       desiredCount: 1,
       deploymentStrategy: DeploymentStrategy.BLUE_GREEN,
       bakeTime: Duration.minutes(5),
@@ -113,6 +123,10 @@ export class EcsStack extends Stack {
       taskDefinition: productApiTaskDefinition,
       serviceConnectConfiguration: {
         services: [{ portMappingName: 'product-api', dnsName: 'product-api', port: 8000 }],
+        logDriver: new AwsLogDriver({
+          logGroup: serviceConnectLogGroup,
+          streamPrefix: 'product-api',
+        }),
       },
       desiredCount: 1,
       deploymentStrategy: DeploymentStrategy.BLUE_GREEN,
@@ -121,6 +135,10 @@ export class EcsStack extends Stack {
       vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
       assignPublicIp: false,
     });
+
+    (storefrontService.node.defaultChild as CfnService).addResourceDependency(
+      productApiService.node.defaultChild as CfnService,
+    );
 
     productApiService.connections.allowFrom(
       storefrontService,
