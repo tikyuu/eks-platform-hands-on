@@ -31,6 +31,7 @@ new EcsStack(app, 'EcsStack', {
   productApiRepository: ecrStack.productApiRepository,
   storefrontRepository: ecrStack.storefrontRepository,
   database: databaseStack.database,
+  productApiSecret: databaseStack.productApiSecret,
   databaseSecurityGroup: databaseStack.databaseSecurityGroup,
 });
 

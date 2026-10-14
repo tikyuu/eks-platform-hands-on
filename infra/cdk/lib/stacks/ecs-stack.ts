@@ -2,13 +2,14 @@ import { Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { Alarm, ComparisonOperator, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { ISecurityGroup, Port, SubnetType } from 'aws-cdk-lib/aws-ec2';
-import { AlarmBehavior, AlternateTarget, AwsLogDriver, CfnService, Cluster, ContainerImage, DeploymentStrategy, FargateService, FargateTaskDefinition, ListenerRuleConfiguration } from 'aws-cdk-lib/aws-ecs';
+import { AlarmBehavior, AlternateTarget, AwsLogDriver, CfnService, Cluster, ContainerImage, DeploymentStrategy, FargateService, FargateTaskDefinition, ListenerRuleConfiguration, Secret as EcsSecret } from 'aws-cdk-lib/aws-ecs';
 import { IRepository } from 'aws-cdk-lib/aws-ecr';
 import { ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, HttpCodeTarget, ListenerAction, ListenerCondition, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IDatabaseInstance } from 'aws-cdk-lib/aws-rds';
 import { ARecord, HostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
+import { ISecret } from 'aws-cdk-lib/aws-secretsmanager';
 import { HttpNamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 import { Network } from '../constructs/network/network';
@@ -25,6 +26,7 @@ export interface EcsStackProps extends StackProps {
   readonly productApiRepository: IRepository;
   readonly storefrontRepository: IRepository;
   readonly database: IDatabaseInstance;
+  readonly productApiSecret: ISecret;
   readonly databaseSecurityGroup: ISecurityGroup;
 }
 
@@ -116,6 +118,11 @@ export class EcsStack extends Stack {
       environment: {
         PRODUCT_API_DB_HOST: props.database.dbInstanceEndpointAddress,
         PRODUCT_API_DB_PORT: props.database.dbInstanceEndpointPort,
+        PRODUCT_API_DB_NAME: 'ecs_app',
+      },
+      secrets: {
+        PRODUCT_API_DB_USER: EcsSecret.fromSecretsManager(props.productApiSecret, 'username'),
+        PRODUCT_API_DB_PASSWORD: EcsSecret.fromSecretsManager(props.productApiSecret, 'password'),
       },
       logging: new AwsLogDriver({
         logGroup: productApiLogGroup,
