@@ -25,6 +25,7 @@ export interface EcsStackProps extends StackProps {
   readonly domainConfig: EcsApiDomainConfig;
   readonly productApiRepository: IRepository;
   readonly storefrontRepository: IRepository;
+  readonly databaseInitRepository: IRepository;
   readonly database: IDatabaseInstance;
   readonly productApiSecret: ISecret;
   readonly databaseSecurityGroup: ISecurityGroup;

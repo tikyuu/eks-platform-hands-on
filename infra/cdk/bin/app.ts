@@ -30,6 +30,7 @@ new EcsStack(app, 'EcsStack', {
   domainConfig: stgEcsApiDomainConfig,
   productApiRepository: ecrStack.productApiRepository,
   storefrontRepository: ecrStack.storefrontRepository,
+  databaseInitRepository: ecrStack.databaseInitRepository,
   database: databaseStack.database,
   productApiSecret: databaseStack.productApiSecret,
   databaseSecurityGroup: databaseStack.databaseSecurityGroup,
