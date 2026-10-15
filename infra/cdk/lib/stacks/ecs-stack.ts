@@ -27,6 +27,7 @@ export interface EcsStackProps extends StackProps {
   readonly storefrontRepository: IRepository;
   readonly databaseInitRepository: IRepository;
   readonly database: IDatabaseInstance;
+  readonly databaseAdminSecret: ISecret;
   readonly productApiSecret: ISecret;
   readonly databaseSecurityGroup: ISecurityGroup;
 }
@@ -95,6 +96,12 @@ export class EcsStack extends Stack {
         PRODUCT_API_DB_HOST: props.database.dbInstanceEndpointAddress,
         PRODUCT_API_DB_PORT: props.database.dbInstanceEndpointPort,
         PRODUCT_API_DB_NAME: 'ecs_app',
+      },
+      secrets: {
+        DB_INIT_ADMIN_USER: EcsSecret.fromSecretsManager(props.databaseAdminSecret, 'username'),
+        DB_INIT_ADMIN_PASSWORD: EcsSecret.fromSecretsManager(props.databaseAdminSecret, 'password'),
+        PRODUCT_API_DB_USER: EcsSecret.fromSecretsManager(props.productApiSecret, 'username'),
+        PRODUCT_API_DB_PASSWORD: EcsSecret.fromSecretsManager(props.productApiSecret, 'password'),
       },
     });
 

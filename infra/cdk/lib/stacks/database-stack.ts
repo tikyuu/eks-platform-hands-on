@@ -12,6 +12,7 @@ export interface DatabaseStackProps extends StackProps {
 export class DatabaseStack extends Stack {
   readonly database: DatabaseInstance;
   readonly databaseSecurityGroup: SecurityGroup;
+  readonly adminSecret: Secret;
   readonly productApiSecret: Secret;
 
   constructor(scope: Construct, id: string, props: DatabaseStackProps) {
@@ -24,7 +25,7 @@ export class DatabaseStack extends Stack {
       allowAllOutbound: false,
     });
 
-    const adminSecret = new Secret(this, 'DatabaseAdminSecret', {
+    this.adminSecret = new Secret(this, 'DatabaseAdminSecret', {
       description: 'Administrative database credentials; do not pass to the product API.',
       generateSecretString: {
         secretStringTemplate: JSON.stringify({ username: 'db_admin' }),
@@ -42,7 +43,7 @@ export class DatabaseStack extends Stack {
         version: PostgresEngineVersion.of('18.6', '18'),
       }),
       instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
-      credentials: Credentials.fromSecret(adminSecret),
+      credentials: Credentials.fromSecret(this.adminSecret),
       vpc: props.network.vpcReference,
       vpcSubnets: { subnetType: SubnetType.PRIVATE_ISOLATED },
       securityGroups: [this.databaseSecurityGroup],
