@@ -1,0 +1,16 @@
+FROM python:3.13-slim
+
+WORKDIR /code
+
+COPY --from=ghcr.io/astral-sh/uv:0.12.17 /uv /usr/local/bin/uv
+
+COPY pyproject.toml uv.lock ./
+
+RUN uv sync --locked --no-dev
+
+COPY scripts/create_app_db_user.py ./scripts/create_app_db_user.py
+
+COPY alembic.ini ./
+COPY migrations/ ./migrations/
+
+CMD ["/code/.venv/bin/python", "scripts/create_app_db_user.py"]
