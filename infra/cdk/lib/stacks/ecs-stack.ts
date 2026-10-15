@@ -84,6 +84,20 @@ export class EcsStack extends Stack {
       memoryLimitMiB: 1024,
     });
 
+    const databaseInitTaskDefinition = new FargateTaskDefinition(this, 'DatabaseInitTaskDefinition', {
+      cpu: 256,
+      memoryLimitMiB: 512,
+    });
+
+    databaseInitTaskDefinition.addContainer('DatabaseInitContainer', {
+      image: ContainerImage.fromEcrRepository(props.databaseInitRepository, 'v1'),
+      environment: {
+        PRODUCT_API_DB_HOST: props.database.dbInstanceEndpointAddress,
+        PRODUCT_API_DB_PORT: props.database.dbInstanceEndpointPort,
+        PRODUCT_API_DB_NAME: 'ecs_app',
+      },
+    });
+
     storefrontTaskDefinition.addContainer('StorefrontContainer', {
       image: ContainerImage.fromEcrRepository(props.storefrontRepository, 'v1'),
       portMappings: [{ containerPort: 3000 }],
