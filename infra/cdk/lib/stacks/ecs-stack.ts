@@ -75,6 +75,11 @@ export class EcsStack extends Stack {
       retention: RetentionDays.ONE_MONTH,
     });
 
+    const databaseInitLogGroup = new LogGroup(this, 'DatabaseInitLogGroup', {
+      logGroupName: 'ecs-stg-logs-db-init',
+      retention: RetentionDays.ONE_MONTH,
+    });
+
     const productApiTaskDefinition = new FargateTaskDefinition(this, 'ProductApiTaskDefinition', {
       cpu: 512,
       memoryLimitMiB: 1024,
@@ -103,6 +108,10 @@ export class EcsStack extends Stack {
         PRODUCT_API_DB_USER: EcsSecret.fromSecretsManager(props.productApiSecret, 'username'),
         PRODUCT_API_DB_PASSWORD: EcsSecret.fromSecretsManager(props.productApiSecret, 'password'),
       },
+      logging: new AwsLogDriver({
+        logGroup: databaseInitLogGroup,
+        streamPrefix: 'db-init',
+      }),
     });
 
     storefrontTaskDefinition.addContainer('StorefrontContainer', {
