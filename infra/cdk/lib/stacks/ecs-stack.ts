@@ -1,7 +1,7 @@
 import { Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { Alarm, ComparisonOperator, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
-import { ISecurityGroup, Port, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { ISecurityGroup, Port, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { AlarmBehavior, AlternateTarget, AwsLogDriver, CfnService, Cluster, ContainerImage, DeploymentStrategy, FargateService, FargateTaskDefinition, ListenerRuleConfiguration, Secret as EcsSecret } from 'aws-cdk-lib/aws-ecs';
 import { IRepository } from 'aws-cdk-lib/aws-ecr';
 import { ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, HttpCodeTarget, ListenerAction, ListenerCondition, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -79,6 +79,20 @@ export class EcsStack extends Stack {
       logGroupName: 'ecs-stg-logs-db-init',
       retention: RetentionDays.ONE_MONTH,
     });
+
+    const databaseInitSecurityGroup = new SecurityGroup(this, 'DatabaseInitSecurityGroup', {
+      securityGroupName: 'ecs-stg-sg-db-init',
+      description: 'Security group for database initialization tasks.',
+      vpc: props.network.vpcReference,
+      allowAllOutbound: true,
+    });
+
+    props.databaseSecurityGroup.addIngressRule(
+      databaseInitSecurityGroup,
+      Port.tcp(5432),
+      'Allow PostgreSQL from database initialization tasks',
+      true,
+    );
 
     const productApiTaskDefinition = new FargateTaskDefinition(this, 'ProductApiTaskDefinition', {
       cpu: 512,
