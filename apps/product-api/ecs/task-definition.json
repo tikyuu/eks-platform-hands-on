@@ -1,0 +1,48 @@
+{
+  "cpu": "512",
+  "memory": "1024",
+  "containerDefinitions": [
+    {
+      "name": "ProductApiContainer",
+      "image": "IMAGE_PLACEHOLDER",
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "name": "product-api"
+        }
+      ],
+      "environment": [
+        {
+          "name": "PRODUCT_API_DB_NAME",
+          "value": "ecs_app"
+        },
+        {
+          "name": "PRODUCT_API_DB_HOST",
+          "value": "DB_HOST_PLACEHOLDER"
+        },
+        {
+          "name": "PRODUCT_API_DB_PORT",
+          "value": "DB_PORT_PLACEHOLDER"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "PRODUCT_API_DB_USER",
+          "valueFrom": "DB_SECRET_ARN_PLACEHOLDER:username::"
+        },
+        {
+          "name": "PRODUCT_API_DB_PASSWORD",
+          "valueFrom": "DB_SECRET_ARN_PLACEHOLDER:password::"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "LOG_GROUP_NAME_PLACEHOLDER",
+          "awslogs-region": "ap-northeast-1",
+          "awslogs-stream-prefix": "product-api"
+        }
+      }
+    }
+  ]
+}
