@@ -1,4 +1,7 @@
 {
+  "family": "ecs-stg-task-product-api",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
   "cpu": "512",
   "memory": "1024",
   "containerDefinitions": [
