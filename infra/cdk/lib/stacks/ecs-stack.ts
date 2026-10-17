@@ -1,4 +1,4 @@
-import { CfnParameter, Duration, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, CfnParameter, Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { Alarm, ComparisonOperator, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { ISecurityGroup, Port, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
@@ -110,6 +110,11 @@ export class EcsStack extends Stack {
     props.productApiRepository.grantPull(productApiExecutionRole);
     props.productApiSecret.grantRead(productApiExecutionRole);
     productApiLogGroup.grantWrite(productApiExecutionRole);
+
+    new CfnOutput(this, 'ProductApiExecutionRoleArn', {
+      value: productApiExecutionRole.roleArn,
+      description: 'Task execution role ARN for product API deployment workflows.',
+    });
 
     const productApiTaskDefinition = new FargateTaskDefinition(this, 'ProductApiTaskDefinition', {
       cpu: 512,
