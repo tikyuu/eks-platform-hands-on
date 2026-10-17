@@ -1,4 +1,4 @@
-import { Duration, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnParameter, Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { Alarm, ComparisonOperator, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { ISecurityGroup, Port, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
@@ -35,6 +35,13 @@ export interface EcsStackProps extends StackProps {
 export class EcsStack extends Stack {
   constructor(scope: Construct, id: string, props: EcsStackProps) {
     super(scope, id, props);
+
+    const applicationDesiredCount = new CfnParameter(this, 'ApplicationDesiredCount', {
+      type: 'Number',
+      default: 0,
+      allowedValues: ['0', '1'],
+      description: 'Tasks per application service: 0 during initial database setup, 1 to run applications.',
+    });
 
     const hostedZone = HostedZone.fromHostedZoneAttributes(this, 'EcsApiHostedZone', {
       hostedZoneId: props.domainConfig.hostedZoneId,
@@ -150,7 +157,7 @@ export class EcsStack extends Stack {
           streamPrefix: 'storefront',
         }),
       },
-      desiredCount: 1,
+      desiredCount: applicationDesiredCount.valueAsNumber,
       deploymentStrategy: DeploymentStrategy.BLUE_GREEN,
       bakeTime: Duration.minutes(5),
       vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
@@ -186,7 +193,7 @@ export class EcsStack extends Stack {
           streamPrefix: 'product-api',
         }),
       },
-      desiredCount: 1,
+      desiredCount: applicationDesiredCount.valueAsNumber,
       deploymentStrategy: DeploymentStrategy.BLUE_GREEN,
       bakeTime: Duration.minutes(5),
       circuitBreaker: { enable: true, rollback: true },
