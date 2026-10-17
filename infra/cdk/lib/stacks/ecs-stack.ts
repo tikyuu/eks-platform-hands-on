@@ -107,6 +107,10 @@ export class EcsStack extends Stack {
       assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
     });
 
+    props.productApiRepository.grantPull(productApiExecutionRole);
+    props.productApiSecret.grantRead(productApiExecutionRole);
+    productApiLogGroup.grantWrite(productApiExecutionRole);
+
     const productApiTaskDefinition = new FargateTaskDefinition(this, 'ProductApiTaskDefinition', {
       cpu: 512,
       memoryLimitMiB: 1024,
