@@ -5,6 +5,7 @@ import { ISecurityGroup, Port, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws
 import { AlarmBehavior, AlternateTarget, AwsLogDriver, CfnService, Cluster, ContainerImage, DeploymentStrategy, FargateService, FargateTaskDefinition, ListenerRuleConfiguration, Secret as EcsSecret } from 'aws-cdk-lib/aws-ecs';
 import { IRepository } from 'aws-cdk-lib/aws-ecr';
 import { ApplicationListenerRule, ApplicationLoadBalancer, ApplicationProtocol, ApplicationTargetGroup, HttpCodeTarget, ListenerAction, ListenerCondition, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IDatabaseInstance } from 'aws-cdk-lib/aws-rds';
 import { ARecord, HostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
@@ -101,9 +102,15 @@ export class EcsStack extends Stack {
       true,
     );
 
+    const productApiExecutionRole = new Role(this, 'ProductApiExecutionRole', {
+      roleName: 'ecs-stg-role-product-api-execution',
+      assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
+    });
+
     const productApiTaskDefinition = new FargateTaskDefinition(this, 'ProductApiTaskDefinition', {
       cpu: 512,
       memoryLimitMiB: 1024,
+      executionRole: productApiExecutionRole,
     });
 
     const storefrontTaskDefinition = new FargateTaskDefinition(this, 'StorefrontTaskDefinition', {
