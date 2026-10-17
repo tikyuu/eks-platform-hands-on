@@ -73,6 +73,11 @@ export class EcsStack extends Stack {
       retention: RetentionDays.ONE_MONTH,
     });
 
+    new CfnOutput(this, 'ProductApiLogGroupName', {
+      value: productApiLogGroup.logGroupName,
+      description: 'Log group name for product API deployment workflows.',
+    });
+
     const storefrontLogGroup = new LogGroup(this, 'StorefrontLogGroup', {
       logGroupName: 'ecs-stg-logs-storefront',
       retention: RetentionDays.ONE_MONTH,
