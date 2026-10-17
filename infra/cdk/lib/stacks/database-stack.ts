@@ -1,4 +1,4 @@
-import { Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { InstanceClass, InstanceSize, InstanceType, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Credentials, DatabaseInstance, DatabaseInstanceEngine, PostgresEngineVersion, StorageType } from 'aws-cdk-lib/aws-rds';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
@@ -61,6 +61,16 @@ export class DatabaseStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
+    new CfnOutput(this, 'DatabaseEndpointAddress', {
+      value: this.database.dbInstanceEndpointAddress,
+      description: 'RDS endpoint address for application deployment workflows.',
+    });
+
+    new CfnOutput(this, 'DatabaseEndpointPort', {
+      value: this.database.dbInstanceEndpointPort,
+      description: 'RDS port for application deployment workflows.',
+    });
+
     // This stores credentials only. Creating the PostgreSQL user and grants is a later step.
     this.productApiSecret = new Secret(this, 'ProductApiDatabaseSecret', {
       description: 'Database credentials for product_api_app; provision the DB user before use.',
@@ -71,6 +81,11 @@ export class DatabaseStack extends Stack {
         excludePunctuation: true,
       },
       removalPolicy: RemovalPolicy.DESTROY,
+    });
+
+    new CfnOutput(this, 'ProductApiDatabaseSecretArn', {
+      value: this.productApiSecret.secretArn,
+      description: 'Secret ARN for product API database credentials; does not include secret values.',
     });
   }
 }
