@@ -1,0 +1,25 @@
+name: Product API CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'apps/product-api/**'
+      - '.github/workflows/product-api-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: 商品APIのDockerビルド
+    runs-on: ubuntu-latest
+    steps:
+      - name: コードを取得
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: 商品APIのイメージをビルド
+        run: docker build --file apps/product-api/Dockerfile --tag product-api:ci apps/product-api
