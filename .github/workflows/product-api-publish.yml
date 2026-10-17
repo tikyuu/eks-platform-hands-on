@@ -1,4 +1,4 @@
-name: Product API ECR Login
+name: Product API Image Publish
 
 on:
   workflow_dispatch:
@@ -9,9 +9,11 @@ permissions:
 
 jobs:
   publish:
-    name: 商品API配信用のAWS認証・ECRログイン
+    name: 商品APIのイメージをECRへpush
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: コードを取得
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -27,3 +29,15 @@ jobs:
       - name: ECRへログイン
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
+
+      - name: 商品APIのイメージをビルド
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ecs-stg-ecr-product-api
+        run: docker build --file apps/product-api/Dockerfile --tag "$REGISTRY/$REPOSITORY:$IMAGE_TAG" apps/product-api
+
+      - name: 商品APIのイメージをECRへpush
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ecs-stg-ecr-product-api
+        run: docker push "$REGISTRY/$REPOSITORY:$IMAGE_TAG"
