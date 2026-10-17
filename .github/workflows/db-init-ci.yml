@@ -1,0 +1,31 @@
+name: DB Init CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'apps/product-api/Dockerfile.db-init'
+      - 'apps/product-api/.dockerignore'
+      - 'apps/product-api/pyproject.toml'
+      - 'apps/product-api/uv.lock'
+      - 'apps/product-api/scripts/create_app_db_user.py'
+      - 'apps/product-api/alembic.ini'
+      - 'apps/product-api/migrations/**'
+      - '.github/workflows/db-init-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: DB初期化用のDockerビルド
+    runs-on: ubuntu-latest
+    steps:
+      - name: コードを取得
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: DB初期化用のイメージをビルド
+        run: docker build --file apps/product-api/Dockerfile.db-init --tag db-init:ci apps/product-api
