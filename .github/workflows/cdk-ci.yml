@@ -1,0 +1,39 @@
+name: CDK CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'infra/cdk/**'
+      - '.github/workflows/cdk-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  cdk-check:
+    name: CDKのビルド・synth
+    runs-on: ubuntu-latest
+    steps:
+      - name: コードを取得
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Node.js 24を準備
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+
+      - name: CDKの依存ライブラリをインストール
+        run: npm ci
+        working-directory: infra/cdk
+
+      - name: CDKをビルド
+        run: npm run build
+        working-directory: infra/cdk
+
+      - name: CloudFormationテンプレートを生成
+        run: npm run cdk -- synth --quiet
+        working-directory: infra/cdk

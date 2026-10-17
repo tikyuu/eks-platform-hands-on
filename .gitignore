@@ -12,6 +12,7 @@ crash.*.log
 # CDK generated files
 /infra/cdk/node_modules/
 /infra/cdk/dist/
+/infra/cdk/cdk.out/
 
 # Python local files
 /apps/product-api/.venv/
