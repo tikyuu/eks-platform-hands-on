@@ -3,6 +3,7 @@ import { stgEcsApiDomainConfig, stgInternetGatewayConfig, stgNatGatewayConfig, s
 import { DatabaseStack } from '../lib/stacks/database-stack';
 import { EcsStack } from '../lib/stacks/ecs-stack';
 import { EcrStack } from '../lib/stacks/ecr-stack';
+import { GitHubActionsStack } from '../lib/stacks/github-actions-stack';
 import { NetworkStack } from '../lib/stacks/network-stack';
 
 const app = new App();
@@ -20,6 +21,10 @@ const networkStack = new NetworkStack(app, 'NetworkStack', {
 });
 
 const ecrStack = new EcrStack(app, 'EcrStack');
+
+new GitHubActionsStack(app, 'GitHubActionsStack', {
+  productApiRepository: ecrStack.productApiRepository,
+});
 
 const databaseStack = new DatabaseStack(app, 'DatabaseStack', {
   network: networkStack.network,
