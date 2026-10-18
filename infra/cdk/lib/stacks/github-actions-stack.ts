@@ -35,6 +35,32 @@ export class GitHubActionsStack extends Stack {
     }));
 
     productApiPublishRole.addToPolicy(new PolicyStatement({
+      actions: ['iam:PassRole'],
+      resources: [this.formatArn({
+        service: 'iam',
+        region: '',
+        resource: 'role',
+        resourceName: 'ecs-stg-role-product-api-execution',
+        arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
+      })],
+      conditions: {
+        StringEquals: {
+          'iam:PassedToService': 'ecs-tasks.amazonaws.com',
+        },
+      },
+    }));
+
+    productApiPublishRole.addToPolicy(new PolicyStatement({
+      actions: ['ecs:UpdateService', 'ecs:DescribeServices'],
+      resources: [this.formatArn({
+        service: 'ecs',
+        resource: 'service',
+        resourceName: 'ecs-stg-cluster/ecs-stg-service-product-api',
+        arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
+      })],
+    }));
+
+    productApiPublishRole.addToPolicy(new PolicyStatement({
       actions: ['cloudformation:DescribeStacks'],
       resources: ['DatabaseStack', 'EcsStack'].map((stackName) => this.formatArn({
         service: 'cloudformation',
