@@ -48,6 +48,11 @@ jobs:
             | .OutputValue
           ' "$RUNNER_TEMP/product-api-database-outputs.json")
 
+          if [[ -z "$DB_HOST" || "$DB_HOST" == "null" ]]; then
+            echo "::error::DatabaseEndpointAddressが取得できません。DatabaseStackのOutputsを確認してください。"
+            exit 1
+          fi
+
           DB_PORT=$(jq -r '
             .[]
             | select(.OutputKey == "DatabaseEndpointPort")
