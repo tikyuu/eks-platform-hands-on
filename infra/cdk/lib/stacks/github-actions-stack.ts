@@ -16,7 +16,7 @@ export class GitHubActionsStack extends Stack {
       clientIds: ['sts.amazonaws.com'],
     });
 
-    new Role(this, 'InfrastructureDeployRole', {
+    const infrastructureDeployRole = new Role(this, 'InfrastructureDeployRole', {
       roleName: 'ecs-stg-role-github-infra-deploy',
       assumedBy: new OpenIdConnectPrincipal(githubOidcProvider, {
         StringEquals: {
@@ -26,6 +26,16 @@ export class GitHubActionsStack extends Stack {
         },
       }),
     });
+
+    infrastructureDeployRole.addToPolicy(new PolicyStatement({
+      actions: ['ecs:DescribeServices'],
+      resources: [this.formatArn({
+        service: 'ecs',
+        resource: 'service',
+        resourceName: 'ecs-stg-cluster/ecs-stg-service-product-api',
+        arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
+      })],
+    }));
 
     const productApiPublishRole = new Role(this, 'ProductApiPublishRole', {
       roleName: 'ecs-stg-role-github-product-api-push',
