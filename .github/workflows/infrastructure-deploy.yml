@@ -55,3 +55,9 @@ jobs:
           fi
 
           echo "PRODUCT_API_TASK_DEFINITION_ARN=$TASK_DEFINITION_ARN" >> "$GITHUB_ENV"
+
+      - name: 使用中のタスク定義を引き継いでテンプレートを生成
+        run: |
+          npm run cdk -- synth --quiet \
+            -c "productApiTaskDefinitionArn=$PRODUCT_API_TASK_DEFINITION_ARN"
+        working-directory: infra/cdk
