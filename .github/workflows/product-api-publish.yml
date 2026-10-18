@@ -59,11 +59,21 @@ jobs:
             | .OutputValue
           ' "$RUNNER_TEMP/product-api-database-outputs.json")
 
+          if [[ -z "$DB_PORT" || "$DB_PORT" == "null" ]]; then
+            echo "::error::DatabaseEndpointPortが取得できません。DatabaseStackのOutputsを確認してください。"
+            exit 1
+          fi
+
           DB_SECRET_ARN=$(jq -r '
             .[]
             | select(.OutputKey == "ProductApiDatabaseSecretArn")
             | .OutputValue
           ' "$RUNNER_TEMP/product-api-database-outputs.json")
+
+          if [[ -z "$DB_SECRET_ARN" || "$DB_SECRET_ARN" == "null" ]]; then
+            echo "::error::ProductApiDatabaseSecretArnが取得できません。DatabaseStackのOutputsを確認してください。"
+            exit 1
+          fi
 
           EXECUTION_ROLE_ARN=$(jq -r '
             .[]
@@ -71,11 +81,21 @@ jobs:
             | .OutputValue
           ' "$RUNNER_TEMP/product-api-ecs-outputs.json")
 
+          if [[ -z "$EXECUTION_ROLE_ARN" || "$EXECUTION_ROLE_ARN" == "null" ]]; then
+            echo "::error::ProductApiExecutionRoleArnが取得できません。EcsStackのOutputsを確認してください。"
+            exit 1
+          fi
+
           LOG_GROUP_NAME=$(jq -r '
             .[]
             | select(.OutputKey == "ProductApiLogGroupName")
             | .OutputValue
           ' "$RUNNER_TEMP/product-api-ecs-outputs.json")
+
+          if [[ -z "$LOG_GROUP_NAME" || "$LOG_GROUP_NAME" == "null" ]]; then
+            echo "::error::ProductApiLogGroupNameが取得できません。EcsStackのOutputsを確認してください。"
+            exit 1
+          fi
 
           jq --arg db_host "$DB_HOST" \
             --arg db_port "$DB_PORT" \
