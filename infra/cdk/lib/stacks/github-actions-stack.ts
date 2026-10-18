@@ -1,6 +1,6 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { ArnFormat, Stack, StackProps } from 'aws-cdk-lib';
 import { IRepository } from 'aws-cdk-lib/aws-ecr';
-import { OidcProviderNative, OpenIdConnectPrincipal, Role } from 'aws-cdk-lib/aws-iam';
+import { OidcProviderNative, OpenIdConnectPrincipal, PolicyStatement, Role } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
 export interface GitHubActionsStackProps extends StackProps {
@@ -28,5 +28,15 @@ export class GitHubActionsStack extends Stack {
     });
 
     props.productApiRepository.grantPush(productApiPublishRole);
+
+    productApiPublishRole.addToPolicy(new PolicyStatement({
+      actions: ['cloudformation:DescribeStacks'],
+      resources: ['DatabaseStack', 'EcsStack'].map((stackName) => this.formatArn({
+        service: 'cloudformation',
+        resource: 'stack',
+        resourceName: `${stackName}/*`,
+        arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
+      })),
+    }));
   }
 }
