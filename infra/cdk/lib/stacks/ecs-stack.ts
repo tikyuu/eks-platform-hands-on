@@ -25,6 +25,7 @@ export interface EcsStackProps extends StackProps {
   readonly network: Network;
   readonly domainConfig: EcsApiDomainConfig;
   readonly productApiRepository: IRepository;
+  readonly productApiTaskDefinitionArn?: string;
   readonly storefrontRepository: IRepository;
   readonly databaseInitRepository: IRepository;
   readonly database: IDatabaseInstance;
@@ -222,8 +223,15 @@ export class EcsStack extends Stack {
       assignPublicIp: false,
     });
 
+    const productApiCfnService = productApiService.node.defaultChild as CfnService;
+
+    // ARNが渡されたインフラ更新では、初回用ではなく使用中の定義を参照する。
+    if (props.productApiTaskDefinitionArn) {
+      productApiCfnService.taskDefinition = props.productApiTaskDefinitionArn;
+    }
+
     (storefrontService.node.defaultChild as CfnService).addResourceDependency(
-      productApiService.node.defaultChild as CfnService,
+      productApiCfnService,
     );
 
     productApiService.connections.allowFrom(
