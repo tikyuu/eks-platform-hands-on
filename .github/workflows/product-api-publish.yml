@@ -40,7 +40,7 @@ jobs:
             --query 'Stacks[0].Outputs' \
             --output json > "$RUNNER_TEMP/product-api-ecs-outputs.json"
 
-      - name: タスク定義JSONにDB接続情報を設定
+      - name: タスク定義JSONにDB接続情報・実行ロール・ログ送信先を設定
         run: |
           DB_HOST=$(jq -r '
             .[]
@@ -60,10 +60,25 @@ jobs:
             | .OutputValue
           ' "$RUNNER_TEMP/product-api-database-outputs.json")
 
+          EXECUTION_ROLE_ARN=$(jq -r '
+            .[]
+            | select(.OutputKey == "ProductApiExecutionRoleArn")
+            | .OutputValue
+          ' "$RUNNER_TEMP/product-api-ecs-outputs.json")
+
+          LOG_GROUP_NAME=$(jq -r '
+            .[]
+            | select(.OutputKey == "ProductApiLogGroupName")
+            | .OutputValue
+          ' "$RUNNER_TEMP/product-api-ecs-outputs.json")
+
           jq --arg db_host "$DB_HOST" \
             --arg db_port "$DB_PORT" \
-            --arg db_secret_arn "$DB_SECRET_ARN" '
-            (.containerDefinitions[]
+            --arg db_secret_arn "$DB_SECRET_ARN" \
+            --arg execution_role_arn "$EXECUTION_ROLE_ARN" \
+            --arg log_group_name "$LOG_GROUP_NAME" '
+            .executionRoleArn = $execution_role_arn
+            | (.containerDefinitions[]
               | select(.name == "ProductApiContainer")
               | .environment[]
               | select(.name == "PRODUCT_API_DB_HOST")
@@ -83,6 +98,9 @@ jobs:
               | .secrets[]
               | select(.name == "PRODUCT_API_DB_PASSWORD")
               | .valueFrom) = ($db_secret_arn + ":password::")
+            | (.containerDefinitions[]
+              | select(.name == "ProductApiContainer")
+              | .logConfiguration.options["awslogs-group"]) = $log_group_name
           ' apps/product-api/ecs/task-definition.json \
             > "$RUNNER_TEMP/product-api-task-definition.json"
 
@@ -101,3 +119,11 @@ jobs:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ecs-stg-ecr-product-api
         run: docker push "$REGISTRY/$REPOSITORY:$IMAGE_TAG"
+
+      - name: タスク定義JSONに配信イメージを設定
+        id: render-task-definition
+        uses: aws-actions/amazon-ecs-render-task-definition@8d79160660ad39c402a16e5fc7cd2a32e8f7d6b7 # v1.9.1
+        with:
+          task-definition: ${{ runner.temp }}/product-api-task-definition.json
+          container-name: ProductApiContainer
+          image: ${{ steps.login-ecr.outputs.registry }}/ecs-stg-ecr-product-api:${{ env.IMAGE_TAG }}
