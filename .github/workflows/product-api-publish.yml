@@ -33,6 +33,13 @@ jobs:
             --query 'Stacks[0].Outputs' \
             --output json > "$RUNNER_TEMP/product-api-database-outputs.json"
 
+      - name: ECSスタックのOutputsを取得
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name EcsStack \
+            --query 'Stacks[0].Outputs' \
+            --output json > "$RUNNER_TEMP/product-api-ecs-outputs.json"
+
       - name: ECRへログイン
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
