@@ -8,6 +8,12 @@ import { NetworkStack } from '../lib/stacks/network-stack';
 
 const app = new App();
 
+// インフラ更新時に、Actionsで配信済みのタスク定義を引き継ぐための入力。
+const productApiTaskDefinitionArn = app.node.tryGetContext('productApiTaskDefinitionArn');
+if (productApiTaskDefinitionArn !== undefined && !isRevisionedTaskDefinitionArn(productApiTaskDefinitionArn)) {
+  throw new Error('productApiTaskDefinitionArnにはリビジョン付きのタスク定義ARNを指定してください。');
+}
+
 const networkStack = new NetworkStack(app, 'NetworkStack', {
   vpcConfig: stgVpcConfig,
   internetGatewayConfig: stgInternetGatewayConfig,
@@ -35,6 +41,7 @@ new EcsStack(app, 'EcsStack', {
   domainConfig: stgEcsApiDomainConfig,
   productApiRepository: ecrStack.productApiRepository,
   storefrontRepository: ecrStack.storefrontRepository,
+  productApiTaskDefinitionArn,
   databaseInitRepository: ecrStack.databaseInitRepository,
   database: databaseStack.database,
   databaseAdminSecret: databaseStack.adminSecret,
@@ -43,3 +50,8 @@ new EcsStack(app, 'EcsStack', {
 });
 
 app.synth();
+
+function isRevisionedTaskDefinitionArn(value: unknown): value is string {
+  const pattern = /^arn:[a-z0-9-]+:ecs:[a-z0-9-]+:\d{12}:task-definition\/[A-Za-z0-9_-]+:[1-9]\d*$/;
+  return typeof value === 'string' && pattern.test(value);
+}
