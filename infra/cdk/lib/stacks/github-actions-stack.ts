@@ -16,6 +16,17 @@ export class GitHubActionsStack extends Stack {
       clientIds: ['sts.amazonaws.com'],
     });
 
+    new Role(this, 'InfrastructureDeployRole', {
+      roleName: 'ecs-stg-role-github-infra-deploy',
+      assumedBy: new OpenIdConnectPrincipal(githubOidcProvider, {
+        StringEquals: {
+          'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
+          'token.actions.githubusercontent.com:sub':
+            'repo:tikyuu@224914317/eks-platform-hands-on@1389884351:ref:refs/heads/main',
+        },
+      }),
+    });
+
     const productApiPublishRole = new Role(this, 'ProductApiPublishRole', {
       roleName: 'ecs-stg-role-github-product-api-push',
       assumedBy: new OpenIdConnectPrincipal(githubOidcProvider, {
