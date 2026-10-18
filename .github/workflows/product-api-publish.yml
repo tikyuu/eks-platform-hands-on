@@ -26,6 +26,13 @@ jobs:
           role-to-assume: ${{ vars.PRODUCT_API_PUSH_ROLE_ARN }}
           aws-region: ap-northeast-1
 
+      - name: DBスタックのOutputsを取得
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name DatabaseStack \
+            --query 'Stacks[0].Outputs' \
+            --output json > "$RUNNER_TEMP/product-api-database-outputs.json"
+
       - name: ECRへログイン
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
