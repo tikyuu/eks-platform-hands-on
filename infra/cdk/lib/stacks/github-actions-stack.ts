@@ -30,6 +30,11 @@ export class GitHubActionsStack extends Stack {
     props.productApiRepository.grantPush(productApiPublishRole);
 
     productApiPublishRole.addToPolicy(new PolicyStatement({
+      actions: ['ecs:RegisterTaskDefinition'],
+      resources: ['*'],
+    }));
+
+    productApiPublishRole.addToPolicy(new PolicyStatement({
       actions: ['cloudformation:DescribeStacks'],
       resources: ['DatabaseStack', 'EcsStack'].map((stackName) => this.formatArn({
         service: 'cloudformation',
