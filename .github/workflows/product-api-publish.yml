@@ -40,6 +40,52 @@ jobs:
             --query 'Stacks[0].Outputs' \
             --output json > "$RUNNER_TEMP/product-api-ecs-outputs.json"
 
+      - name: タスク定義JSONにDB接続情報を設定
+        run: |
+          DB_HOST=$(jq -r '
+            .[]
+            | select(.OutputKey == "DatabaseEndpointAddress")
+            | .OutputValue
+          ' "$RUNNER_TEMP/product-api-database-outputs.json")
+
+          DB_PORT=$(jq -r '
+            .[]
+            | select(.OutputKey == "DatabaseEndpointPort")
+            | .OutputValue
+          ' "$RUNNER_TEMP/product-api-database-outputs.json")
+
+          DB_SECRET_ARN=$(jq -r '
+            .[]
+            | select(.OutputKey == "ProductApiDatabaseSecretArn")
+            | .OutputValue
+          ' "$RUNNER_TEMP/product-api-database-outputs.json")
+
+          jq --arg db_host "$DB_HOST" \
+            --arg db_port "$DB_PORT" \
+            --arg db_secret_arn "$DB_SECRET_ARN" '
+            (.containerDefinitions[]
+              | select(.name == "ProductApiContainer")
+              | .environment[]
+              | select(.name == "PRODUCT_API_DB_HOST")
+              | .value) = $db_host
+            | (.containerDefinitions[]
+              | select(.name == "ProductApiContainer")
+              | .environment[]
+              | select(.name == "PRODUCT_API_DB_PORT")
+              | .value) = $db_port
+            | (.containerDefinitions[]
+              | select(.name == "ProductApiContainer")
+              | .secrets[]
+              | select(.name == "PRODUCT_API_DB_USER")
+              | .valueFrom) = ($db_secret_arn + ":username::")
+            | (.containerDefinitions[]
+              | select(.name == "ProductApiContainer")
+              | .secrets[]
+              | select(.name == "PRODUCT_API_DB_PASSWORD")
+              | .valueFrom) = ($db_secret_arn + ":password::")
+          ' apps/product-api/ecs/task-definition.json \
+            > "$RUNNER_TEMP/product-api-task-definition.json"
+
       - name: ECRへログイン
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
