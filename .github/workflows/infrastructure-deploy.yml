@@ -61,3 +61,9 @@ jobs:
           npm run cdk -- synth --quiet \
             -c "productApiTaskDefinitionArn=$PRODUCT_API_TASK_DEFINITION_ARN"
         working-directory: infra/cdk
+
+      - name: デプロイ済みの設定との差分を確認
+        run: |
+          npm run cdk -- diff --all --method=template \
+            -c "productApiTaskDefinitionArn=$PRODUCT_API_TASK_DEFINITION_ARN"
+        working-directory: infra/cdk
