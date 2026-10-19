@@ -3,6 +3,18 @@ name: Infrastructure Deploy
 on:
   workflow_dispatch:
     inputs:
+      stack:
+        description: '対象スタック（依存スタックも処理対象に含まれる場合があります）'
+        type: choice
+        required: true
+        default: EcsStack
+        options:
+          - EcsStack
+          - NetworkStack
+          - EcrStack
+          - GitHubActionsStack
+          - DatabaseStack
+          - 全スタック
       deploy:
         description: '差分確認後にAWSへデプロイする（AWSリソースの変更・費用が発生する可能性があります）'
         type: boolean
@@ -23,6 +35,28 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      - name: 選択したスタックをCDKの実行対象に設定
+        env:
+          SELECTED_STACK: ${{ inputs.stack }}
+        run: |
+          if [[ "$SELECTED_STACK" == "全スタック" ]]; then
+            CDK_TARGET="--all"
+
+          elif [[ "$SELECTED_STACK" == "EcsStack" ||
+                  "$SELECTED_STACK" == "NetworkStack" ||
+                  "$SELECTED_STACK" == "EcrStack" ||
+                  "$SELECTED_STACK" == "GitHubActionsStack" ||
+                  "$SELECTED_STACK" == "DatabaseStack" ]]; then
+            CDK_TARGET="$SELECTED_STACK"
+
+          else
+            echo "::error::対象スタックの選択が不正です。"
+            exit 1
+          fi
+
+          # 後続のsynth・diffで使えるように保存する
+          echo "CDK_TARGET=$CDK_TARGET" >> "$GITHUB_ENV"
 
       - name: Node.js 24を準備
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -64,12 +98,12 @@ jobs:
 
       - name: 使用中のタスク定義を引き継いでテンプレートを生成
         run: |
-          npm run cdk -- synth --quiet \
+          npm run cdk -- synth "$CDK_TARGET" --quiet \
             -c "productApiTaskDefinitionArn=$PRODUCT_API_TASK_DEFINITION_ARN"
         working-directory: infra/cdk
 
       - name: デプロイ済みの設定との差分を確認
         run: |
-          npm run cdk -- diff --all --method=template \
+          npm run cdk -- diff "$CDK_TARGET" --method=template \
             -c "productApiTaskDefinitionArn=$PRODUCT_API_TASK_DEFINITION_ARN"
         working-directory: infra/cdk
