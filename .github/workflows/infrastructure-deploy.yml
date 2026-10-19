@@ -2,6 +2,12 @@ name: Infrastructure Deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      deploy:
+        description: '差分確認後にAWSへデプロイする（AWSリソースの変更・費用が発生する可能性があります）'
+        type: boolean
+        required: true
+        default: false
 
 permissions:
   contents: read
