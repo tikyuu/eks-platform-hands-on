@@ -49,6 +49,18 @@ export class GitHubActionsStack extends Stack {
       })],
     }));
 
+    // CloudFormationへ更新を依頼するため、標準のCDKデプロイ用ロールを引き受ける。
+    infrastructureDeployRole.addToPolicy(new PolicyStatement({
+      actions: ['sts:AssumeRole'],
+      resources: [this.formatArn({
+        service: 'iam',
+        region: '',
+        resource: 'role',
+        resourceName: `cdk-hnb659fds-deploy-role-${this.account}-${this.region}`,
+        arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
+      })],
+    }));
+
     const productApiPublishRole = new Role(this, 'ProductApiPublishRole', {
       roleName: 'ecs-stg-role-github-product-api-push',
       assumedBy: new OpenIdConnectPrincipal(githubOidcProvider, {
