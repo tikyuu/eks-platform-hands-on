@@ -61,6 +61,18 @@ export class GitHubActionsStack extends Stack {
       })],
     }));
 
+    // 生成したテンプレートをCDK用S3へ置くため、標準のファイルアップロード用ロールを引き受ける。
+    infrastructureDeployRole.addToPolicy(new PolicyStatement({
+      actions: ['sts:AssumeRole'],
+      resources: [this.formatArn({
+        service: 'iam',
+        region: '',
+        resource: 'role',
+        resourceName: `cdk-hnb659fds-file-publishing-role-${this.account}-${this.region}`,
+        arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
+      })],
+    }));
+
     const productApiPublishRole = new Role(this, 'ProductApiPublishRole', {
       roleName: 'ecs-stg-role-github-product-api-push',
       assumedBy: new OpenIdConnectPrincipal(githubOidcProvider, {
