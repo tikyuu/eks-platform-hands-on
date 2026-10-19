@@ -116,3 +116,15 @@ jobs:
             npm run cdk -- diff "$CDK_TARGET" --method=template
           fi
         working-directory: infra/cdk
+
+      - name: 選択したスタックをデプロイ
+        if: inputs.deploy
+        run: |
+          if [[ "$CDK_TARGET" == "EcsStack" || "$CDK_TARGET" == "--all" ]]; then
+            npm run cdk -- deploy "$CDK_TARGET" \
+              -c "productApiTaskDefinitionArn=$PRODUCT_API_TASK_DEFINITION_ARN" \
+              --require-approval never
+          else
+            npm run cdk -- deploy "$CDK_TARGET" --require-approval never
+          fi
+        working-directory: infra/cdk
