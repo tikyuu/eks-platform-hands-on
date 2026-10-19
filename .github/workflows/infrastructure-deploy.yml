@@ -78,6 +78,7 @@ jobs:
           aws-region: ap-northeast-1
 
       - name: 使用中のタスク定義ARNを取得
+        if: inputs.stack == 'EcsStack' || inputs.stack == '全スタック'
         run: |
           TASK_DEFINITION_ARN=$(aws ecs describe-services \
             --cluster ecs-stg-cluster \
@@ -96,14 +97,22 @@ jobs:
 
           echo "PRODUCT_API_TASK_DEFINITION_ARN=$TASK_DEFINITION_ARN" >> "$GITHUB_ENV"
 
-      - name: 使用中のタスク定義を引き継いでテンプレートを生成
+      - name: 選択したスタックのテンプレートを生成
         run: |
-          npm run cdk -- synth "$CDK_TARGET" --quiet \
-            -c "productApiTaskDefinitionArn=$PRODUCT_API_TASK_DEFINITION_ARN"
+          if [[ "$CDK_TARGET" == "EcsStack" || "$CDK_TARGET" == "--all" ]]; then
+            npm run cdk -- synth "$CDK_TARGET" --quiet \
+              -c "productApiTaskDefinitionArn=$PRODUCT_API_TASK_DEFINITION_ARN"
+          else
+            npm run cdk -- synth "$CDK_TARGET" --quiet
+          fi
         working-directory: infra/cdk
 
       - name: デプロイ済みの設定との差分を確認
         run: |
-          npm run cdk -- diff "$CDK_TARGET" --method=template \
-            -c "productApiTaskDefinitionArn=$PRODUCT_API_TASK_DEFINITION_ARN"
+          if [[ "$CDK_TARGET" == "EcsStack" || "$CDK_TARGET" == "--all" ]]; then
+            npm run cdk -- diff "$CDK_TARGET" --method=template \
+              -c "productApiTaskDefinitionArn=$PRODUCT_API_TASK_DEFINITION_ARN"
+          else
+            npm run cdk -- diff "$CDK_TARGET" --method=template
+          fi
         working-directory: infra/cdk
