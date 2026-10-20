@@ -5,6 +5,7 @@ import { Construct } from 'constructs';
 
 export interface GitHubActionsStackProps extends StackProps {
   readonly productApiRepository: IRepository;
+  readonly storefrontRepository: IRepository;
 }
 
 export class GitHubActionsStack extends Stack {
@@ -72,6 +73,19 @@ export class GitHubActionsStack extends Stack {
         arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
       })],
     }));
+
+    const storefrontPublishRole = new Role(this, 'StorefrontPublishRole', {
+      roleName: 'ecs-stg-role-github-storefront-push',
+      assumedBy: new OpenIdConnectPrincipal(githubOidcProvider, {
+        StringEquals: {
+          'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
+          'token.actions.githubusercontent.com:sub':
+            'repo:tikyuu@224914317/eks-platform-hands-on@1389884351:ref:refs/heads/main',
+        },
+      }),
+    });
+
+    props.storefrontRepository.grantPush(storefrontPublishRole);
 
     const productApiPublishRole = new Role(this, 'ProductApiPublishRole', {
       roleName: 'ecs-stg-role-github-product-api-push',
