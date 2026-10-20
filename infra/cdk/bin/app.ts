@@ -30,6 +30,7 @@ const ecrStack = new EcrStack(app, 'EcrStack');
 
 new GitHubActionsStack(app, 'GitHubActionsStack', {
   productApiRepository: ecrStack.productApiRepository,
+  storefrontRepository: ecrStack.storefrontRepository,
 });
 
 const databaseStack = new DatabaseStack(app, 'DatabaseStack', {
