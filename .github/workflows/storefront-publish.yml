@@ -29,3 +29,15 @@ jobs:
       - name: ECRへログイン
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
+
+      - name: フロントのイメージをビルド
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ecs-stg-ecr-storefront
+        run: docker build --file apps/storefront/Dockerfile --tag "$REGISTRY/$REPOSITORY:$IMAGE_TAG" apps/storefront
+
+      - name: フロントのイメージをECRへpush
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ecs-stg-ecr-storefront
+        run: docker push "$REGISTRY/$REPOSITORY:$IMAGE_TAG"
