@@ -163,7 +163,7 @@ export default function ProteinCatalog() {
                 <div className={styles.productBottom}><p className={styles.productPrice}>{yen(product.price)}<small>税込</small></p><button className={styles.addButton} onClick={() => addToCart(product)} aria-label={`${product.name} ${product.flavor}をカートに追加`}><Icon name="cart" size={18} /><span>追加</span></button></div>
               </div>
             </li>)}</ul> : <div className={styles.emptyState}><Icon name="search" size={32} /><h3>{priceInvalid ? "価格帯を確認してください" : "条件に合う商品がありません"}</h3><p>検索ワードや絞り込み条件を変えてお試しください。</p><button className={styles.primaryButton} onClick={resetFilters}>条件をすべてクリア</button></div>}
-            <p className={styles.catalogNote}>表示価格はすべて税込です。商品・ブランド・商品パッケージは画面確認用の架空データです。</p>
+            <p className={styles.catalogNote}>メーカー名は実在しますが、商品名・味・容量・価格・パッケージは学習用の架空データで、実際の商品情報とは異なります。</p>
           </section>
         </div>
 
