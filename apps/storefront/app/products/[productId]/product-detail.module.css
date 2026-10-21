@@ -1,0 +1,62 @@
+.main { padding-bottom: 60px; }
+.backLink { display: inline-block; font-size: 12px; margin: 0 0 26px; color: #63755d !important; }
+.productLayout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; align-items: start; }
+.visual { position: relative; min-height: 560px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+.visual > div { transform: scale(1.9); margin: 100px 0 85px; }
+.visual > p { font-size: 12px; letter-spacing: .06em; color: #667359; margin-bottom: 30px; }
+.sampleBadge { position: absolute; top: 24px; left: 24px; font-size: 10px; letter-spacing: .16em; color: #68785f; }
+.info { padding-top: 8px; min-width: 0; }
+.info h1 { font-size: clamp(23px, 2.5vw, 32px); line-height: 1.5; font-weight: 650; margin: 0 0 10px; }
+.subtitle { font-size: 12px; color: #708064; margin: 0 0 17px; }
+.reviewLink { color: #8b7032 !important; font-size: 14px; }
+.reviewLink span { font-size: 11px; margin-left: 10px; text-decoration: underline; }
+.price { font-size: 34px; font-weight: 650; letter-spacing: -.8px; margin: 24px 0 15px; }
+.price small { font-size: 11px; font-weight: 400; color: #748268; margin-left: 10px; letter-spacing: 0; }
+.description { line-height: 1.95; font-size: 13px; color: #68775f; margin-bottom: 24px; }
+.selections { display: grid; grid-template-columns: 1fr; gap: 9px; border-top: 1px solid #dfe4d7; padding-top: 22px; }
+.selections label { font-size: 12px; font-weight: 650; margin-top: 8px; }
+.selections label span { margin-left: 12px; font-size: 9px; font-weight: 400; letter-spacing: .1em; color: #7e8872; }
+.selections select, .purchaseRow select { border: 1px solid #d4dccd; background: white; border-radius: 4px; color: #344c3c; padding: 13px; width: 100%; min-height: 46px; }
+.selectionNotice { font-size: 11px; color: #7a6030; line-height: 1.7; }
+.purchaseRow { display: flex; gap: 24px; align-items: center; margin: 20px 0; }
+.purchaseRow label { display: flex; align-items: center; gap: 12px; font-size: 12px; white-space: nowrap; }
+.purchaseRow select { min-width: 70px; width: auto; }
+.inStock { color: #406841; font-size: 11px; }
+.soldOut { color: #a13f31; font-size: 12px; }
+.subtotal { font-size: 12px; line-height: 1.9; color: #66765b; margin: 15px 0; }
+.subtotal strong { font-size: 18px; color: #263e2e; margin-left: 8px; }
+.addButton { width: 100%; font-size: 14px !important; min-height: 52px; }
+.buyButton { width: 100%; border: 1px solid #c2cdb9; border-radius: 4px; background: #edf0e7; color: #5c7056; padding: 14px; margin-top: 12px; min-height: 48px; }
+.section { border-top: 1px solid #dfe4d7; margin-top: 55px; padding-top: 32px; scroll-margin-top: 24px; }
+.section h2 { font-size: 23px; font-weight: 600; margin: 0 0 20px; }
+.section h2 small { font-size: 12px; font-weight: 400; color: #758367; margin-left: 12px; }
+.section > p { font-size: 13px; line-height: 1.9; color: #6c7d61; }
+.specs { margin-top: 25px; max-width: 650px; }
+.specs > div { display: grid; grid-template-columns: 150px 1fr; border-bottom: 1px solid #e1e6d8; font-size: 12px; }
+.specs dt { background: #eef1e8; padding: 15px; }
+.specs dd { padding: 15px; margin: 0; }
+.nutritionTable { width: 100%; max-width: 760px; border-collapse: collapse; table-layout: fixed; font-size: 13px; margin: 22px 0 12px; }
+.nutritionTable caption { text-align: left; color: #65765b; font-size: 11px; line-height: 1.8; padding-bottom: 12px; }
+.nutritionTable th, .nutritionTable td { padding: 16px; border-bottom: 1px solid #dfe4d7; text-align: right; font-variant-numeric: tabular-nums; }
+.nutritionTable thead th { background: #eaf0e3; color: #3e593f; font-size: 12px; font-weight: 600; line-height: 1.7; }
+.nutritionTable th:first-child { text-align: left; width: 40%; }
+.nutritionTable tbody th { font-weight: 500; background: #f1f4ed; }
+.nutritionTable td { white-space: nowrap; }
+.review { border-top: 1px solid #e0e5d8; padding: 24px 0; }
+.stars { color: #9a7938; letter-spacing: .12em; margin: 0 0 12px; }
+.review h3 { font-size: 14px; margin: 0 0 10px; }
+.review > p:not(.stars) { font-size: 12px; line-height: 1.9; color: #6a795f; }
+.review small { font-size: 10px; color: #829074; }
+@media (max-width: 1050px) { .productLayout { gap: 32px; } .visual { min-height: 460px; } .visual > div { transform: scale(1.5); } }
+@media (max-width: 760px) {
+  .productLayout { grid-template-columns: 1fr; gap: 28px; }
+  .visual { min-height: 340px; }
+  .visual > div { transform: scale(1.35); margin: 65px 0 45px; }
+  .visual > p { margin-bottom: 24px; }
+  .price { font-size: 30px; }
+  .specs > div { grid-template-columns: 110px 1fr; }
+  .section { margin-top: 36px; }
+  .nutritionTable { font-size: 12px; }
+  .nutritionTable th, .nutritionTable td { padding: 13px 8px; }
+  .nutritionTable thead th { font-size: 10px; }
+}
