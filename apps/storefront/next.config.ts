@@ -7,7 +7,8 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   turbopack: {
     rules: {
-      "*.css": {
+      // CSS ModulesはNext.js標準に任せ、Tailwindの変換はグローバルCSSだけに適用する。
+      "globals.css": {
         loaders: ["@tailwindcss/turbopack"],
         as: "*.css",
       },
