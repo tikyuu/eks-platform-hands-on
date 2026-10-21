@@ -9,7 +9,7 @@ import styles from "./protein-catalog.module.css";
 interface CartContextValue {
   count: number;
   openCart: () => void;
-  addToCart: (variant: SampleProduct, quantity?: number) => void;
+  addToCart: (variant: SampleProduct, quantity?: number) => number;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -42,13 +42,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [open]);
 
   function addToCart(variant: SampleProduct, quantity = 1) {
+    if (!Number.isInteger(quantity) || quantity < 1) return 0;
     const remaining = Math.min(10, getSampleStock(variant.id)) - (cart[variant.id] ?? 0);
     if (remaining <= 0) {
       setNotice("在庫数または同じ組み合わせの上限10点に達しています。");
-      return;
+      return 0;
     }
     setCart((current) => addSampleCartItem(current, variant.id, quantity));
     setNotice(`${variant.flavor} / ${variant.weight}を${Math.min(quantity, remaining)}点追加しました。`);
+    return Math.min(quantity, remaining);
   }
 
   function changeQuantity(id: number, amount: number) {
