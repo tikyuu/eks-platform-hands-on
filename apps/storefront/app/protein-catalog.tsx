@@ -1,36 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { brands, filterProducts, isPriceRangeInvalid, proteinTypes, sampleProducts, type ProteinType, type SampleProduct, type SortOrder } from "@/lib/sample-products";
+import Link from "next/link";
+import { useState } from "react";
+import { StoreHeader, useCart } from "./cart-provider";
+import { Icon, ProductPack, yen } from "./store-ui";
+import { brands, productHref, filterProducts, isPriceRangeInvalid, proteinTypes, sampleProducts, type ProteinType, type SortOrder } from "@/lib/sample-products";
 import styles from "./protein-catalog.module.css";
 
-const yen = (value: number) => `¥${value.toLocaleString("ja-JP")}`;
 const typeDescriptions = { WPC: "ホエイプロテイン", WPI: "ホエイアイソレート", SOY: "ソイプロテイン" };
-
-function Icon({ name, size = 20 }: { name: "search" | "cart" | "arrow" | "close" | "filter" | "leaf"; size?: number }) {
-  const paths = {
-    search: <><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 4 4" /></>,
-    cart: <><path d="M3 4h2l2 12h11l2-8H6" /><circle cx="9" cy="20" r="1" /><circle cx="17" cy="20" r="1" /></>,
-    arrow: <path d="M5 12h14m-6-6 6 6-6 6" />,
-    close: <path d="m6 6 12 12M6 18 18 6" />,
-    filter: <><path d="M4 7h3m4 0h9M4 17h9m4 0h3" /><circle cx="9" cy="7" r="2" /><circle cx="15" cy="17" r="2" /></>,
-    leaf: <><path d="M19 4C8 2 3 8 6 15s15 6 13-11Z" /><path d="m4 21 11-12" /></>,
-  };
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
-}
-
-function ProductPack({ product }: { product: SampleProduct }) {
-  return (
-    <div className={styles.pack} style={{ "--pack-color": product.color } as CSSProperties} aria-hidden="true">
-      <div className={styles.packSeal} />
-      <span className={styles.packBrand}>{product.brand}</span>
-      <Icon name="leaf" size={24} />
-      <strong className={styles.packName}>{product.label.split(" ").map((word) => <span key={word}>{word}</span>)}</strong>
-      <span className={styles.packFlavor}>{product.flavor}</span>
-      <div className={styles.packBottom}><b>{product.type}</b><span>{product.weight}</span></div>
-    </div>
-  );
-}
 
 export default function ProteinCatalog() {
   const [query, setQuery] = useState("");
@@ -40,31 +17,11 @@ export default function ProteinCatalog() {
   const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState<SortOrder>("recommended");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [activeProduct, setActiveProduct] = useState<SampleProduct | null>(null);
-  const [cartOpen, setCartOpen] = useState(false);
-  // 画面確認用のカート。再読み込みでリセットされ、注文・決済は行わない。
-  const [cart, setCart] = useState<Record<number, number>>({});
-  const [notice, setNotice] = useState("");
-  const dialog = useRef<HTMLDialogElement>(null);
-  const modalOpen = activeProduct !== null || cartOpen;
-
-  useEffect(() => {
-    const element = dialog.current;
-    if (!element) return;
-    if (modalOpen && !element.open) element.showModal();
-    if (!modalOpen && element.open) element.close();
-    if (!modalOpen) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = previousOverflow; };
-  }, [modalOpen]);
+  const { addToCart } = useCart();
 
   const priceInvalid = isPriceRangeInvalid(minPrice, maxPrice);
   const products = filterProducts(sampleProducts, { query, types, brands: selectedBrands, minPrice, maxPrice, sort });
   const filterCount = types.length + selectedBrands.length + Number(minPrice !== "" || maxPrice !== "");
-  const cartItems = sampleProducts.filter((product) => (cart[product.id] ?? 0) > 0);
-  const cartCount = Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
-  const total = cartItems.reduce((sum, product) => sum + product.price * cart[product.id], 0);
 
   function toggleType(type: ProteinType) {
     setTypes((current) => current.includes(type) ? current.filter((item) => item !== type) : [...current, type]);
@@ -75,28 +32,11 @@ export default function ProteinCatalog() {
   function resetFilters() {
     setTypes([]); setSelectedBrands([]); setMinPrice(""); setMaxPrice(""); setQuery("");
   }
-  function closeDialog() { setActiveProduct(null); setCartOpen(false); }
-  function addToCart(product: SampleProduct) {
-    if ((cart[product.id] ?? 0) >= 10) { setNotice("同じ商品は10点まで追加できます。"); return; }
-    setCart((current) => ({ ...current, [product.id]: Math.min((current[product.id] ?? 0) + 1, 10) }));
-    setNotice(`${product.flavor}をカートに追加しました。カートは再読み込みでリセットされます。`);
-  }
-  function changeQuantity(id: number, amount: number) {
-    setCart((current) => ({ ...current, [id]: Math.max(0, Math.min(10, (current[id] ?? 0) + amount)) }));
-  }
 
   return (
     <div className={styles.store}>
       <a className={styles.skipLink} href="#products">商品一覧へスキップ</a>
-      <div className={styles.announcement}>自分に合う一杯を、ここから。<span>学習用ストア · 商品はすべてサンプルです</span></div>
-      <header className={styles.header}>
-        <a href="/" className={styles.logo} aria-label="DAILY PROTEIN トップ">
-          <span className={styles.logoMark}><Icon name="leaf" size={23} /></span>
-          <span>DAILY<span className={styles.logoLight}>PROTEIN</span><small>YOUR EVERYDAY NUTRITION</small></span>
-        </a>
-        <nav className={styles.navigation} aria-label="メインナビゲーション"><a href="#products" className={styles.activeNav}>商品を探す</a><a href="#protein-guide">プロテインの種類</a></nav>
-        <button className={styles.cartButton} onClick={() => { setActiveProduct(null); setCartOpen(true); }} aria-label={`カートを見る（${cartCount}点）`}><Icon name="cart" /><span>カート</span><b>{cartCount}</b></button>
-      </header>
+      <StoreHeader />
 
       <main className={styles.main}>
         <div className={styles.breadcrumb}>HOME <span>/</span> プロテイン</div>
@@ -152,13 +92,13 @@ export default function ProteinCatalog() {
               {(minPrice || maxPrice) && <button onClick={() => { setMinPrice(""); setMaxPrice(""); }}>{minPrice ? yen(Number(minPrice)) : "下限なし"} 〜 {maxPrice ? yen(Number(maxPrice)) : "上限なし"}<Icon name="close" size={13} /></button>}
             </div>}
             {products.length > 0 ? <ul className={styles.productGrid}>{products.map((product) => <li key={product.id} className={styles.productCard}>
-              <button className={styles.productVisual} style={{ background: product.background }} onClick={() => setActiveProduct(product)} aria-label={`${product.name} ${product.flavor}の商品詳細を見る`}>
+              <Link className={styles.productVisual} style={{ background: product.background }} href={productHref(product)} aria-label={`${product.name} ${product.flavor}の商品詳細を見る`}>
                 <span className={styles.typeBadge}>{product.type}</span>{product.id === 1 && <span className={styles.pickBadge}>PICK UP</span>}
                 <ProductPack product={product} /><span className={styles.visualCaption}>{product.flavor}</span>
-              </button>
+              </Link>
               <div className={styles.productInfo}>
                 <p className={styles.productBrand}>{product.brand}</p>
-                <button className={styles.productName} onClick={() => setActiveProduct(product)}>{product.name}</button>
+                <Link className={styles.productName} href={productHref(product)}>{product.name}</Link>
                 <p className={styles.productMeta}>{product.flavor}<span> / {product.weight}</span></p>
                 <div className={styles.productBottom}><p className={styles.productPrice}>{yen(product.price)}<small>税込</small></p><button className={styles.addButton} onClick={() => addToCart(product)} aria-label={`${product.name} ${product.flavor}をカートに追加`}><Icon name="cart" size={18} /><span>追加</span></button></div>
               </div>
@@ -173,36 +113,6 @@ export default function ProteinCatalog() {
         </section>
       </main>
       <footer className={styles.footer}><span>DAILY PROTEIN<span className={styles.footerDot}>.</span></span><p>自分のペースで、毎日を少しずつ。</p><small>学習用デモサイト · 実際の注文・決済はできません</small></footer>
-      <div className={styles.notice} role="status" aria-live="polite">{notice && <><Icon name="cart" size={18} /><span>{notice}</span><button onClick={() => setNotice("")} aria-label="通知を閉じる"><Icon name="close" size={16} /></button></>}</div>
-
-      <dialog ref={dialog} className={styles.dialog} aria-labelledby="dialog-title" onCancel={closeDialog} onClick={(event) => { if (event.target === event.currentTarget) closeDialog(); }}>
-        <div className={styles.dialogContent}>
-          <button className={styles.dialogClose} onClick={closeDialog} aria-label="閉じる"><Icon name="close" /></button>
-          {activeProduct ? <div className={styles.detailLayout}>
-            <div className={styles.detailVisual} style={{ background: activeProduct.background }}><ProductPack product={activeProduct} /></div>
-            <div className={styles.detailInfo}>
-              <p className={styles.eyebrow}>{activeProduct.brand}</p><h2 id="dialog-title">{activeProduct.name}</h2>
-              <p>{activeProduct.flavor} / {activeProduct.weight}</p><span className={styles.detailType}>{activeProduct.type}</span>
-              <p className={styles.detailDescription}>{activeProduct.description}</p><p className={styles.detailPrice}>{yen(activeProduct.price)}<small>税込</small></p>
-              <button className={styles.primaryButton} onClick={() => { addToCart(activeProduct); closeDialog(); }}><Icon name="cart" size={18} />カートに追加</button>
-              <p className={styles.demoNote}>サンプル商品です。実際には購入できません。</p>
-            </div>
-          </div> : cartOpen ? <div className={styles.cartContent}>
-            <p className={styles.eyebrow}>YOUR SELECTION</p><h2 id="dialog-title">カート <small>{cartCount}点</small></h2>
-            {cartItems.length === 0 ? <div className={styles.emptyState}><Icon name="cart" size={36} /><h3>カートは空です</h3><p>気になる商品を追加してみましょう。</p><button className={styles.primaryButton} onClick={closeDialog}>商品を探す</button></div> : <>
-              <ul className={styles.cartItems}>{cartItems.map((product) => <li key={product.id}>
-                <div className={styles.cartThumbnail} style={{ background: product.background }}><ProductPack product={product} /></div>
-                <div className={styles.cartItemInfo}><b>{product.name}</b><p>{product.flavor} / {product.weight}</p><strong>{yen(product.price)}</strong>
-                  <div className={styles.quantity}><button onClick={() => changeQuantity(product.id, -1)} aria-label={`${product.flavor}の数量を減らす`}>−</button><span>{cart[product.id]}</span><button disabled={cart[product.id] >= 10} onClick={() => changeQuantity(product.id, 1)} aria-label={`${product.flavor}の数量を増やす`}>＋</button><button className={styles.removeButton} onClick={() => setCart((current) => ({ ...current, [product.id]: 0 }))}>削除</button></div>
-                </div>
-              </li>)}</ul>
-              <div className={styles.cartTotal}><span>商品合計（税込）</span><strong>{yen(total)}</strong></div>
-              <p className={styles.demoNote}>今回はカートの操作確認までです。注文・決済機能は未実装です。カートは再読み込みするとリセットされます。</p>
-              <button className={styles.primaryButton} onClick={closeDialog}>お買い物を続ける<Icon name="arrow" size={17} /></button>
-            </>}
-          </div> : null}
-        </div>
-      </dialog>
     </div>
   );
 }

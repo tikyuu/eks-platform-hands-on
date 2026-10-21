@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { CartProvider } from "./cart-provider";
 
 export const metadata: Metadata = {
   title: "DAILY PROTEIN | 自分に合うプロテインを見つけよう",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ja" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col"><CartProvider>{children}</CartProvider></body>
     </html>
   );
 }
