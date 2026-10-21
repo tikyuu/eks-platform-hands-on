@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { findVariant, getProductVariants, getSampleStock, getServingNutrition, type SampleProduct } from "@/lib/sample-products";
 import { StoreHeader, useCart } from "../../cart-provider";
 import { Icon, ProductPack, yen } from "../../store-ui";
@@ -26,7 +26,8 @@ export default function ProductDetail({ initialVariant }: { initialVariant: Samp
   const [selected, setSelected] = useState(initialVariant);
   const [quantity, setQuantity] = useState(1);
   const [selectionNotice, setSelectionNotice] = useState("");
-  const { addToCart, openCart } = useCart();
+  const [cartFeedback, setCartFeedback] = useState<{ added: number; id: number } | null>(null);
+  const { addToCart } = useCart();
   const variants = getProductVariants(initialVariant.productId);
   const flavors = [...new Set(variants.map((variant) => variant.flavor))];
   const flavorVariants = variants.filter((variant) => variant.flavor === selected.flavor);
@@ -34,9 +35,16 @@ export default function ProductDetail({ initialVariant }: { initialVariant: Samp
   const quantityLimit = Math.min(10, stock);
   const servingNutrition = getServingNutrition(selected.nutrition);
 
+  useEffect(() => {
+    if (!cartFeedback) return;
+    const timer = window.setTimeout(() => setCartFeedback(null), cartFeedback.added > 0 ? 1100 : 3000);
+    return () => window.clearTimeout(timer);
+  }, [cartFeedback]);
+
   function selectVariant(variant: SampleProduct) {
     setSelected(variant);
     setQuantity(1);
+    setCartFeedback(null);
   }
 
   function changeFlavor(flavor: string) {
@@ -81,7 +89,15 @@ export default function ProductDetail({ initialVariant }: { initialVariant: Samp
             <p className={stock > 0 ? detail.inStock : detail.soldOut}>{stock > 0 ? `● 在庫あり（サンプル残り${stock}点）` : "在庫切れ（サンプル）"}</p>
           </div>
           <p className={detail.subtotal}>選択中：{selected.flavor} / {selected.weight}<br />小計（税込）：<strong>{yen(selected.price * quantity)}</strong></p>
-          <button className={`${styles.primaryButton} ${detail.addButton}`} disabled={stock === 0} onClick={() => { addToCart(selected, quantity); openCart(); }}><Icon name="cart" />カートに入れる</button>
+          <button className={`${styles.primaryButton} ${detail.addButton}`} disabled={stock === 0} onClick={() => setCartFeedback({ added: addToCart(selected, quantity), id: performance.now() })}>
+            <span key={cartFeedback?.id ?? "idle"} className={detail.buttonLabels} data-added={Boolean(cartFeedback && cartFeedback.added > 0)}>
+              <span className={detail.defaultLabel}><Icon name="cart" />カートに入れる</span>
+              {cartFeedback && cartFeedback.added > 0 && <span className={detail.successLabel} aria-hidden="true">✓ {cartFeedback.added}点追加しました</span>}
+            </span>
+          </button>
+          <p className={`${detail.cartFeedback} ${cartFeedback?.added === 0 ? detail.cartFeedbackError : ""}`} role="status" aria-live="polite">
+            {cartFeedback && <span key={cartFeedback.id} className={cartFeedback.added > 0 ? detail.feedbackFade : undefined}>{cartFeedback.added > 0 ? `${selected.flavor} / ${selected.weight}を追加しました。右上のカートから確認できます。` : "在庫数または追加上限に達しているため、追加できませんでした。"}</span>}
+          </p>
           <button className={detail.buyButton} disabled>今すぐ買う（注文機能は準備中）</button>
           <p className={styles.demoNote}>学習用デモです。メーカー名は実在しますが、商品・味・容量・価格・在庫・パッケージは架空で、実際の商品情報とは異なります。注文・決済はできません。</p>
         </section>
