@@ -11,18 +11,18 @@ test("条件なしでは全6商品を表示する", () => {
 
 test("同じ項目内の複数選択はOR条件", () => {
   assert.deepEqual(find({ types: ["WPC", "WPI"] }), [1, 2, 4, 5]);
-  assert.deepEqual(find({ brands: ["DAILY FUEL", "PLANT LAB"] }), [1, 3, 4, 6]);
+  assert.deepEqual(find({ brands: ["エクスプロージョン", "グリコ"] }), [1, 3, 4, 6]);
 });
 
 test("種類・メーカー・価格の異なる項目間はAND条件", () => {
-  assert.deepEqual(find({ types: ["WPC", "WPI"], brands: ["DAILY FUEL"], maxPrice: "4000" }), [1]);
-  assert.deepEqual(find({ types: ["SOY"], brands: ["DAILY FUEL"] }), []);
+  assert.deepEqual(find({ types: ["WPC", "WPI"], brands: ["エクスプロージョン"], maxPrice: "4000" }), [1]);
+  assert.deepEqual(find({ types: ["SOY"], brands: ["エクスプロージョン"] }), []);
 });
 
 test("検索は味・メーカー・種類に対応し、全角英数と複数単語を扱える", () => {
   assert.deepEqual(find({ query: "チョコ" }), [1]);
   assert.deepEqual(find({ query: "ＷＰＩ バニラ" }), [2]);
-  assert.deepEqual(find({ query: "  plant　プレーン  " }), [6]);
+  assert.deepEqual(find({ query: "  グリコ　プレーン  " }), [6]);
 });
 
 test("価格は境界値を含み、片側だけの指定もできる", () => {

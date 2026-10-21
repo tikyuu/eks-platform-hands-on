@@ -1,4 +1,4 @@
-// 画面の操作確認用。商品・ブランド・価格は架空で、APIやDBには接続しない。
+// 画面の操作確認用。メーカー名は実在するものを使用するが、商品・価格は架空で、APIやDBには接続しない。
 export const proteinTypes = ["WPC", "WPI", "SOY"] as const;
 export type ProteinType = (typeof proteinTypes)[number];
 
@@ -17,12 +17,12 @@ export interface SampleProduct {
 }
 
 export const sampleProducts: readonly SampleProduct[] = [
-  { id: 1, brand: "DAILY FUEL", name: "デイリーホエイプロテイン", type: "WPC", flavor: "リッチチョコレート", weight: "1kg", price: 3980, color: "#795744", background: "#f0e9df", label: "DAILY WHEY", description: "毎日の一杯を楽しめる、チョコレートフレーバーのホエイプロテイン。まず試したい定番の一袋です。" },
-  { id: 2, brand: "NORTH NUTRITION", name: "ピュアホエイアイソレート", type: "WPI", flavor: "バニラ", weight: "1kg", price: 5480, color: "#b19a5c", background: "#f2efdf", label: "PURE ISOLATE", description: "バニラフレーバーのWPIプロテイン。味や価格を比べながら、自分に合う一杯を見つけてください。" },
-  { id: 3, brand: "PLANT LAB", name: "プラントソイプロテイン", type: "SOY", flavor: "宇治抹茶", weight: "750g", price: 3480, color: "#63764d", background: "#e9eddf", label: "PLANT SOY", description: "大豆由来のプロテインを、抹茶フレーバーで。植物性の選択肢を探している方に向けたデモ商品です。" },
-  { id: 4, brand: "DAILY FUEL", name: "デイリーホエイプロテイン", type: "WPC", flavor: "ストロベリーミルク", weight: "1kg", price: 4180, color: "#b4777b", background: "#f5e8e6", label: "DAILY WHEY", description: "ストロベリーミルクフレーバーのホエイプロテイン。チョコレート以外の味も比較して選べます。" },
-  { id: 5, brand: "NORTH NUTRITION", name: "ピュアホエイアイソレート", type: "WPI", flavor: "カフェラテ", weight: "1kg", price: 5680, color: "#8d7561", background: "#ece7e1", label: "PURE ISOLATE", description: "カフェラテフレーバーのWPIプロテイン。種類・メーカー・価格の条件を組み合わせて探してみましょう。" },
-  { id: 6, brand: "PLANT LAB", name: "プラントソイプロテイン", type: "SOY", flavor: "プレーン", weight: "750g", price: 2980, color: "#8e9875", background: "#efeee5", label: "PLANT SOY", description: "プレーンタイプの大豆由来プロテイン。シンプルなフレーバーを選びたい方に向けたデモ商品です。" },
+  { id: 1, brand: "エクスプロージョン", name: "デイリーホエイプロテイン", type: "WPC", flavor: "リッチチョコレート", weight: "1kg", price: 3980, color: "#795744", background: "#f0e9df", label: "DAILY WHEY", description: "毎日の一杯を楽しめる、チョコレートフレーバーのホエイプロテイン。まず試したい定番の一袋です。" },
+  { id: 2, brand: "ザバス", name: "ピュアホエイアイソレート", type: "WPI", flavor: "バニラ", weight: "1kg", price: 5480, color: "#b19a5c", background: "#f2efdf", label: "PURE ISOLATE", description: "バニラフレーバーのWPIプロテイン。味や価格を比べながら、自分に合う一杯を見つけてください。" },
+  { id: 3, brand: "グリコ", name: "プラントソイプロテイン", type: "SOY", flavor: "宇治抹茶", weight: "750g", price: 3480, color: "#63764d", background: "#e9eddf", label: "PLANT SOY", description: "大豆由来のプロテインを、抹茶フレーバーで。植物性の選択肢を探している方に向けたデモ商品です。" },
+  { id: 4, brand: "エクスプロージョン", name: "デイリーホエイプロテイン", type: "WPC", flavor: "ストロベリーミルク", weight: "1kg", price: 4180, color: "#b4777b", background: "#f5e8e6", label: "DAILY WHEY", description: "ストロベリーミルクフレーバーのホエイプロテイン。チョコレート以外の味も比較して選べます。" },
+  { id: 5, brand: "ザバス", name: "ピュアホエイアイソレート", type: "WPI", flavor: "カフェラテ", weight: "1kg", price: 5680, color: "#8d7561", background: "#ece7e1", label: "PURE ISOLATE", description: "カフェラテフレーバーのWPIプロテイン。種類・メーカー・価格の条件を組み合わせて探してみましょう。" },
+  { id: 6, brand: "グリコ", name: "プラントソイプロテイン", type: "SOY", flavor: "プレーン", weight: "750g", price: 2980, color: "#8e9875", background: "#efeee5", label: "PLANT SOY", description: "プレーンタイプの大豆由来プロテイン。シンプルなフレーバーを選びたい方に向けたデモ商品です。" },
 ];
 
 export const brands = [...new Set(sampleProducts.map((product) => product.brand))];
