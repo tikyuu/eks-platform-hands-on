@@ -20,3 +20,20 @@ __pycache__/
 
 # Local environment variables
 /.env
+
+# ローカル認証情報・状態・生成物を公開しない
+.aws/
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.p12
+*.pfx
+*.tfplan
+.terraform/
+cdk.out/
+node_modules/
+.venv/
+.DS_Store
